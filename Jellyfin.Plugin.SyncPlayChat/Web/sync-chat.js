@@ -767,18 +767,20 @@
     function getCurrentSession(sessions) {
         const currentDeviceId = normalizeId(getCurrentDeviceId());
         const matchingUserSessions = sessions.filter(matchesCurrentUser);
+        const groupedUserSession = matchingUserSessions.find(hasSyncPlayGroup);
 
         if (currentDeviceId) {
-            const exactDeviceSession = matchingUserSessions.find(function (session) {
+            const exactDeviceSessions = matchingUserSessions.filter(function (session) {
                 return normalizeId(session && session.DeviceId) === currentDeviceId;
             });
+            const groupedDeviceSession = exactDeviceSessions.find(hasSyncPlayGroup);
 
-            if (exactDeviceSession) {
-                return exactDeviceSession;
+            if (groupedDeviceSession || exactDeviceSessions.length > 0) {
+                return groupedDeviceSession || exactDeviceSessions[0];
             }
         }
 
-        return matchingUserSessions.length > 0 ? matchingUserSessions[0] : null;
+        return groupedUserSession || (matchingUserSessions.length > 0 ? matchingUserSessions[0] : null);
     }
 
     function mapKnownSessionIds(sessions) {
@@ -1358,11 +1360,11 @@
                 clearComposerInput();
                 await refreshChatHistory();
             } else {
-                showLocalToast('Failed to send SyncPlay chat message.');
+                showLocalToast('No active SyncPlay recipients were found.');
             }
         } catch (err) {
             logDebug('Failed to send SyncPlay chat message', err);
-            showLocalToast('Failed to send SyncPlay chat message.');
+            showLocalToast('Failed to send: ' + summarizeError(err));
         } finally {
             sendInProgress = false;
             setComposerBusy(false);

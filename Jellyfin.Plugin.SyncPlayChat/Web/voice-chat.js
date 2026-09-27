@@ -24,6 +24,10 @@
         return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     }
 
+    function isSecureVoicePage() {
+        return window.location.protocol === 'https:' && window.isSecureContext === true;
+    }
+
     function qualityDecision(profile, badSamples, goodSamples, loss, jitter, rtt) {
         const poor = loss > 0.08 || jitter > 80 || rtt > 800;
         const degraded = poor || loss >= 0.03 || jitter >= 30 || rtt >= 250;
@@ -453,19 +457,33 @@
             button.className = 'emby-button';
             button.textContent = '🎙 Join Voice';
             button.setAttribute('aria-label', 'Join SyncPlay voice chat');
-            Object.assign(button.style, { display: 'none', padding: '0.48rem 0.92rem', borderRadius: '0.6rem', background: 'rgba(0,0,0,.7)', color: '#fff', border: '1px solid rgba(255,255,255,.25)', cursor: 'pointer' });
-            button.addEventListener('click', () => this.join());
+            Object.assign(button.style, { display: 'none', padding: '0.48rem 0.92rem', borderRadius: '0.6rem', background: 'rgba(0,0,0,.7)', color: '#fff', border: '1px solid rgba(255,255,255,.25)', cursor: 'pointer', whiteSpace: 'nowrap' });
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.join();
+            });
 
             const panel = document.createElement('div');
             panel.id = panelId;
-            Object.assign(panel.style, { display: 'none', minWidth: '13rem', padding: '0.7rem', borderRadius: '0.6rem', background: 'rgba(0,0,0,.82)', color: '#fff', border: '1px solid rgba(255,255,255,.25)' });
+            Object.assign(panel.style, { display: 'none', position: 'fixed', right: 'max(.5rem, env(safe-area-inset-right))', bottom: '4.25rem', width: 'min(18rem, calc(100vw - 1rem))', maxHeight: '55dvh', overflowY: 'auto', boxSizing: 'border-box', padding: '0.7rem', borderRadius: '0.7rem', background: 'rgba(16,16,16,.96)', color: '#fff', border: '1px solid rgba(255,255,255,.25)', boxShadow: '0 .5rem 2rem rgba(0,0,0,.45)' });
             panel.innerHTML = '<div style="font-weight:600;margin-bottom:.35rem">Voice <span data-voice-status style="font-weight:400;font-size:.8rem"></span></div>' +
                 '<div data-voice-participants style="margin-bottom:.55rem"></div>' +
                 '<div data-voice-error role="status" style="display:none;color:#ffd0d0;font-size:.8rem;margin-bottom:.45rem"></div>' +
-                '<button type="button" class="emby-button" data-voice-mute style="margin-right:.35rem">🔇 Mute</button>' +
-                '<button type="button" class="emby-button" data-voice-leave>🚪 Leave</button>';
-            panel.querySelector('[data-voice-mute]').addEventListener('click', () => this.toggleMute());
-            panel.querySelector('[data-voice-leave]').addEventListener('click', () => this.leave());
+                '<div data-voice-actions style="display:flex;gap:.45rem">' +
+                '<button type="button" data-voice-mute style="appearance:none;flex:1;padding:.55rem .7rem;border-radius:.5rem;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);font:inherit;cursor:pointer">🔇 Mute</button>' +
+                '<button type="button" data-voice-leave style="appearance:none;flex:1;padding:.55rem .7rem;border-radius:.5rem;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);font:inherit;cursor:pointer">🚪 Leave voice</button>' +
+                '</div>';
+            panel.querySelector('[data-voice-mute]').addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.toggleMute();
+            });
+            panel.querySelector('[data-voice-leave]').addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.leave();
+            });
             host.appendChild(panel);
             host.appendChild(button);
             this.button = button;
@@ -475,6 +493,11 @@
         onContext(context) {
             const previousSession = this.sessionId;
             this.sessionId = context && context.sessionId || '';
+            if (!isSecureVoicePage()) {
+                this.button.style.display = 'none';
+                this.panel.style.display = 'none';
+                return;
+            }
             this.button.style.display = context && context.inGroup && this.state === 'DISCONNECTED' ? 'inline-flex' : 'none';
             if (this.state !== 'DISCONNECTED' && (!context.inGroup
                 || (previousSession && previousSession !== this.sessionId)
@@ -523,6 +546,8 @@
                 this.state = 'CONNECTED';
                 this.button.style.display = 'none';
                 this.panel.style.display = 'block';
+                this.panel.querySelector('[data-voice-mute]').style.display = 'block';
+                this.panel.querySelector('[data-voice-leave]').textContent = '🚪 Leave voice';
                 this.setStatus('Connected');
                 this.renderParticipants();
                 this.heartbeatTimer = window.setInterval(() => this.heartbeat(), heartbeatMs);
@@ -650,6 +675,7 @@
 
         async cleanup(notifyServer) {
             if (this.state === 'DISCONNECTED' && !this.stream) {
+                this.panel.style.display = 'none';
                 return;
             }
             const sessionId = this.sessionId;
@@ -672,7 +698,7 @@
             this.state = 'DISCONNECTED';
             this.panel.style.display = 'none';
             const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
-            this.button.style.display = context && context.inGroup ? 'inline-flex' : 'none';
+            this.button.style.display = isSecureVoicePage() && context && context.inGroup ? 'inline-flex' : 'none';
             if (notifyServer && sessionId) {
                 try {
                     await api('SyncPlayChat/Voice/Leave', 'POST', { SessionId: sessionId });
@@ -710,6 +736,8 @@
             const target = this.panel.querySelector('[data-voice-error]');
             target.textContent = message || 'Voice chat could not start.';
             target.style.display = 'block';
+            this.panel.querySelector('[data-voice-mute]').style.display = 'none';
+            this.panel.querySelector('[data-voice-leave]').textContent = 'Close';
             this.panel.style.display = 'block';
             window.setTimeout(function () { target.style.display = 'none'; }, 8000);
         }

@@ -381,28 +381,21 @@ public class SyncPlayChatController : ControllerBase
         return Guid.Empty;
     }
 
-    private static SessionInfo? ResolveControllingSession(List<SessionInfo> sessions, Guid userId, string? preferredSessionId)
+    private SessionInfo? ResolveControllingSession(List<SessionInfo> sessions, Guid userId, string? preferredSessionId)
     {
-        if (!string.IsNullOrWhiteSpace(preferredSessionId))
-        {
-            var preferred = sessions.FirstOrDefault(session =>
-                string.Equals(session.Id, preferredSessionId, StringComparison.Ordinal)
-                && session.UserId == userId);
-            if (preferred is not null)
-            {
-                return preferred;
-            }
-        }
-
-        var fromUser = sessions
+        var candidates = sessions
             .Where(session => session.UserId == userId)
             .OrderByDescending(session => session.LastActivityDate)
-            .FirstOrDefault();
-        if (fromUser is not null)
+            .ToList();
+        if (!string.IsNullOrWhiteSpace(preferredSessionId))
         {
-            return fromUser;
+            candidates = candidates
+                .OrderByDescending(session => string.Equals(session.Id, preferredSessionId, StringComparison.Ordinal))
+                .ThenByDescending(session => session.LastActivityDate)
+                .ToList();
         }
 
-        return null;
+        return candidates.FirstOrDefault(session => ResolveGroupsForSession(session).Count > 0)
+            ?? candidates.FirstOrDefault();
     }
 }
