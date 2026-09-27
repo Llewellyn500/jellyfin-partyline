@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.SyncPlayChat.Api;
 using Jellyfin.Plugin.SyncPlayChat.Configuration;
 using Jellyfin.Plugin.SyncPlayChat.Infrastructure;
 using Jellyfin.Plugin.SyncPlayChat.Voice;
@@ -14,6 +15,22 @@ namespace Jellyfin.Plugin.SyncPlayChat.Tests;
 
 public sealed class VoiceRoomManagerTests
 {
+    [Fact]
+    public void ChatHistoryKeepsLatestOneHundredMessages()
+    {
+        var history = new ChatHistoryStore();
+        Guid groupId = Guid.NewGuid();
+        for (int i = 0; i < 105; i++)
+        {
+            history.Add(groupId, Guid.NewGuid(), "User", "Message " + i);
+        }
+
+        var messages = history.Get(groupId);
+        Assert.Equal(100, messages.Count);
+        Assert.Equal("Message 5", messages[0].Text);
+        Assert.Equal("Message 104", messages[^1].Text);
+    }
+
     [Fact]
     public void WebTransformerInjectsTextAndVoiceOnce()
     {

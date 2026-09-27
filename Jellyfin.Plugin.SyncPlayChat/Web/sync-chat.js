@@ -7,12 +7,18 @@
     const composerId = 'syncPlayChatComposer';
     const inputId = 'syncPlayChatInput';
     const sendButtonId = 'syncPlayChatSendButton';
+    const messageListId = 'syncPlayChatMessages';
+    const unreadBadgeId = 'syncPlayChatUnread';
     const refreshIntervalMs = 5000;
     let shouldShowButton = false;
     let currentSessionId = '';
     let currentGroupId = '';
     let refreshInProgress = false;
     let sendInProgress = false;
+    let historyInProgress = false;
+    let historyGroupId = '';
+    let lastMessageId = 0;
+    let unreadCount = 0;
 
     function normalizeId(value) {
         if (value === null || value === undefined) {
@@ -69,7 +75,8 @@
         button.className = 'emby-button ' + markerClass;
         button.setAttribute('aria-label', 'SyncPlay chat');
         button.title = 'SyncPlay chat';
-        button.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 4h16v11H8l-4 4V4z"/></svg>';
+        button.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 4h16v11H8l-4 4V4z"/></svg>' +
+            '<span id="' + unreadBadgeId + '" aria-label="Unread messages" style="display:none;position:absolute;right:-.35rem;top:-.4rem;min-width:1.15rem;height:1.15rem;padding:0 .2rem;border-radius:1rem;background:#e53935;color:#fff;font-size:.72rem;line-height:1.15rem;text-align:center"></span>';
         button.style.display = 'inline-flex';
         button.style.alignItems = 'center';
         button.style.justifyContent = 'center';
@@ -82,6 +89,7 @@
         button.style.border = '1px solid rgba(255, 255, 255, 0.25)';
         button.style.fontSize = '0.9rem';
         button.style.cursor = 'pointer';
+        button.style.position = 'relative';
         button.addEventListener('click', function () {
             toggleComposer(button);
         });
@@ -92,21 +100,69 @@
         const composer = document.createElement('div');
         composer.id = composerId;
         composer.style.display = 'none';
-        composer.style.alignItems = 'center';
-        composer.style.gap = '0.45rem';
-        composer.style.padding = '0.45rem';
-        composer.style.borderRadius = '0.6rem';
-        composer.style.background = 'rgba(0, 0, 0, 0.7)';
+        composer.style.flexDirection = 'column';
+        composer.style.position = 'fixed';
+        composer.style.right = 'max(.5rem, env(safe-area-inset-right))';
+        composer.style.bottom = '4.25rem';
+        composer.style.width = 'min(24rem, calc(100vw - 1rem))';
+        composer.style.height = 'min(70dvh, 34rem)';
+        composer.style.maxHeight = 'min(70dvh, 34rem)';
+        composer.style.boxSizing = 'border-box';
+        composer.style.overflow = 'hidden';
+        composer.style.borderRadius = '0.8rem';
+        composer.style.background = 'rgba(16, 16, 16, 0.96)';
+        composer.style.color = '#fff';
         composer.style.border = '1px solid rgba(255, 255, 255, 0.25)';
+        composer.style.boxShadow = '0 .5rem 2rem rgba(0,0,0,.45)';
+
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'space-between';
+        header.style.padding = '.7rem .8rem';
+        header.style.fontWeight = '600';
+        header.style.borderBottom = '1px solid rgba(255,255,255,.12)';
+        header.appendChild(document.createTextNode('SyncPlay chat'));
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'emby-button';
+        closeButton.textContent = '✕';
+        closeButton.setAttribute('aria-label', 'Close chat');
+        closeButton.style.padding = '.25rem .45rem';
+        closeButton.style.color = '#fff';
+        closeButton.style.background = 'transparent';
+        closeButton.style.border = '0';
+        closeButton.addEventListener('click', hideComposer);
+        header.appendChild(closeButton);
+
+        const messages = document.createElement('div');
+        messages.id = messageListId;
+        messages.setAttribute('role', 'log');
+        messages.setAttribute('aria-live', 'polite');
+        messages.style.flex = '1 1 auto';
+        messages.style.minHeight = '10rem';
+        messages.style.padding = '.7rem';
+        messages.style.overflowY = 'auto';
+        messages.style.overscrollBehavior = 'contain';
+
+        const footer = document.createElement('div');
+        footer.style.display = 'flex';
+        footer.style.alignItems = 'flex-end';
+        footer.style.gap = '.45rem';
+        footer.style.padding = '.6rem';
+        footer.style.borderTop = '1px solid rgba(255,255,255,.12)';
 
         const input = document.createElement('textarea');
         input.id = inputId;
         input.rows = 1;
+        input.maxLength = 1000;
         input.placeholder = 'Type a message';
         input.setAttribute('aria-label', 'SyncPlay chat message');
         input.wrap = 'soft';
-        input.style.width = '15rem';
-        input.style.maxWidth = '54vw';
+        input.style.flex = '1 1 auto';
+        input.style.width = '100%';
+        input.style.minWidth = '0';
         input.style.minHeight = '2rem';
         input.style.height = '2rem';
         input.style.maxHeight = '7rem';
@@ -162,8 +218,11 @@
             autoResizeComposerInput();
         });
 
-        composer.appendChild(input);
-        composer.appendChild(sendButton);
+        footer.appendChild(input);
+        footer.appendChild(sendButton);
+        composer.appendChild(header);
+        composer.appendChild(messages);
+        composer.appendChild(footer);
         return composer;
     }
 
@@ -176,6 +235,138 @@
         composer = createComposer();
         host.appendChild(composer);
         return composer;
+    }
+
+    function isComposerOpen() {
+        const composer = document.getElementById(composerId);
+        return !!composer && composer.style.display !== 'none';
+    }
+
+    function updateUnreadBadge() {
+        const badge = document.getElementById(unreadBadgeId);
+        if (!badge) {
+            return;
+        }
+
+        badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+
+    function readMessageField(message, name) {
+        if (!message) {
+            return '';
+        }
+
+        const camelName = name.charAt(0).toLowerCase() + name.slice(1);
+        return message[name] === undefined ? message[camelName] : message[name];
+    }
+
+    function renderChatHistory(history) {
+        const list = document.getElementById(messageListId);
+        if (!list) {
+            return;
+        }
+
+        const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
+        list.textContent = '';
+
+        if (!history.length) {
+            const empty = document.createElement('div');
+            empty.textContent = 'No messages yet.';
+            empty.style.padding = '2rem .5rem';
+            empty.style.textAlign = 'center';
+            empty.style.color = 'rgba(255,255,255,.65)';
+            list.appendChild(empty);
+            return;
+        }
+
+        const currentUserId = normalizeId(getCurrentUserId());
+        history.forEach(function (message) {
+            const ownMessage = normalizeId(readMessageField(message, 'SenderUserId')) === currentUserId;
+            const item = document.createElement('div');
+            item.style.maxWidth = '88%';
+            item.style.margin = ownMessage ? '.35rem 0 .35rem auto' : '.35rem auto .35rem 0';
+            item.style.padding = '.5rem .65rem';
+            item.style.borderRadius = ownMessage ? '.75rem .75rem .2rem .75rem' : '.75rem .75rem .75rem .2rem';
+            item.style.background = ownMessage ? 'rgba(0,164,220,.38)' : 'rgba(255,255,255,.12)';
+            item.style.overflowWrap = 'anywhere';
+
+            const meta = document.createElement('div');
+            const sentAt = new Date(readMessageField(message, 'SentAt'));
+            meta.textContent = String(readMessageField(message, 'SenderName') || 'Someone') +
+                (Number.isNaN(sentAt.getTime()) ? '' : ' · ' + sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            meta.style.fontSize = '.72rem';
+            meta.style.marginBottom = '.2rem';
+            meta.style.color = 'rgba(255,255,255,.7)';
+
+            const text = document.createElement('div');
+            text.textContent = String(readMessageField(message, 'Text') || '');
+            text.style.whiteSpace = 'pre-wrap';
+            item.appendChild(meta);
+            item.appendChild(text);
+            list.appendChild(item);
+        });
+
+        if (nearBottom || lastMessageId === 0) {
+            list.scrollTop = list.scrollHeight;
+        }
+    }
+
+    function resetChatHistory() {
+        historyGroupId = '';
+        lastMessageId = 0;
+        unreadCount = 0;
+        updateUnreadBadge();
+        renderChatHistory([]);
+    }
+
+    async function refreshChatHistory() {
+        if (historyInProgress || !shouldShowButton || !currentGroupId || !currentSessionId) {
+            return;
+        }
+
+        if (historyGroupId !== currentGroupId) {
+            resetChatHistory();
+            historyGroupId = currentGroupId;
+        }
+
+        historyInProgress = true;
+        try {
+            const response = await fetchJson('SyncPlayChat/History?groupId=' + encodeURIComponent(currentGroupId) +
+                '&senderSessionId=' + encodeURIComponent(currentSessionId));
+            let history = response;
+            if (typeof history === 'string') {
+                history = JSON.parse(history);
+            }
+
+            if (!Array.isArray(history)) {
+                return;
+            }
+
+            const previousLastId = lastMessageId;
+            const currentUserId = normalizeId(getCurrentUserId());
+            history.forEach(function (message) {
+                const id = Number(readMessageField(message, 'Id')) || 0;
+                if (id > lastMessageId) {
+                    lastMessageId = id;
+                }
+
+                if (!isComposerOpen() && id > previousLastId && normalizeId(readMessageField(message, 'SenderUserId')) !== currentUserId) {
+                    unreadCount += 1;
+                }
+            });
+
+            if (isComposerOpen()) {
+                unreadCount = 0;
+            }
+
+            renderChatHistory(history);
+            updateUnreadBadge();
+        } catch (err) {
+            logDebug('Failed to refresh chat history', err);
+        } finally {
+            historyInProgress = false;
+        }
     }
 
     function autoResizeComposerInput() {
@@ -228,6 +419,9 @@
         }
 
         if (!isVisible) {
+            unreadCount = 0;
+            updateUnreadBadge();
+            refreshChatHistory();
             const input = document.getElementById(inputId);
             if (input) {
                 window.setTimeout(function () {
@@ -1107,9 +1301,9 @@
         }
 
         return {
-            attempted: Number(normalized.Attempted) || 0,
-            sent: Number(normalized.Sent) || 0,
-            failed: Number(normalized.Failed) || 0
+            attempted: Number(normalized.Attempted === undefined ? normalized.attempted : normalized.Attempted) || 0,
+            sent: Number(normalized.Sent === undefined ? normalized.sent : normalized.Sent) || 0,
+            failed: Number(normalized.Failed === undefined ? normalized.failed : normalized.Failed) || 0
         };
     }
 
@@ -1132,12 +1326,6 @@
             const groups = normalizeGroupsResponse(groupsResponse);
 
             const currentSession = getCurrentSession(sessions);
-            const senderName = (currentSession && currentSession.UserName)
-                || (currentSession && currentSession.User && currentSession.User.Name)
-                || getCurrentUserName()
-                || 'Someone';
-            const messageText = senderName + ': ' + trimmedText;
-
             const groupIds = getGroupIdsForCurrentUserSessions(sessions);
             const sessionIdsFromSessionGroup = findSessionIdsByGroupIds(sessions, groupIds);
             const sessionIdsFromGroupPayload = findSessionIdsInGroupPayload(groups, sessions);
@@ -1159,7 +1347,7 @@
             let result;
             const preferredGroupId = groupIds.length > 0 ? groupIds[0] : resolveSyncPlayGroupId(groupsForDetailLookup[0] || groups[0]);
             result = await sendMessageViaServer(
-                messageText,
+                trimmedText,
                 currentSession && currentSession.Id,
                 preferredGroupId,
                 participantsForSend);
@@ -1168,7 +1356,7 @@
 
             if (result && result.sent > 0) {
                 clearComposerInput();
-                hideComposer();
+                await refreshChatHistory();
             } else {
                 showLocalToast('Failed to send SyncPlay chat message.');
             }
@@ -1296,6 +1484,11 @@
             window.dispatchEvent(new CustomEvent('syncplaychatcontext', {
                 detail: { inGroup: shouldShowButton, sessionId: currentSessionId, groupId: currentGroupId }
             }));
+            if (shouldShowButton) {
+                refreshChatHistory();
+            } else {
+                resetChatHistory();
+            }
         }
     }
 

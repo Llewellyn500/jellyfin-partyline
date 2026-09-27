@@ -1,6 +1,6 @@
 # Syncplay Chat
 
-`Syncplay Chat` adds text chat and opt-in voice chat to Jellyfin SyncPlay. Text messages remain Jellyfin toasts; voice is direct browser-to-browser WebRTC audio with Jellyfin used only for authenticated signaling.
+`Syncplay Chat` adds text chat and opt-in voice chat to Jellyfin SyncPlay. Text messages appear as Jellyfin toasts and in a mobile-friendly panel containing the room's latest 100 messages. Voice is direct browser-to-browser WebRTC audio with Jellyfin used only for authenticated signaling.
 
 https://github.com/user-attachments/assets/69be29fa-b328-45c5-9967-f9582b0dd7d1
 
@@ -26,6 +26,10 @@ Join a SyncPlay group, then choose `🎙 Join Voice`. Microphone permission is r
 - Presence is memory-only with 10-second heartbeats and a 40-second stale timeout. A server restart clears voice rooms.
 
 Primary support is Jellyfin Web in current Chrome, Firefox, Safari, and Chromium-based Jellyfin Media Player. Mobile web support depends on the OS browser's WebRTC and background-audio policies. Unsupported clients receive a small voice-panel error; playback is not interrupted.
+
+## Text chat
+
+Open the chat button while in a SyncPlay group to read and send messages. Jellyfin keeps the latest 100 messages for each group in memory, so refreshing or briefly leaving the page does not lose the conversation. History clears when Jellyfin restarts.
 
 ### Voice configuration
 

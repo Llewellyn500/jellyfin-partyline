@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Common.Api;
-using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.SyncPlay;
 using MediaBrowser.Controller.SyncPlay.Requests;
@@ -27,20 +26,49 @@ namespace Jellyfin.Plugin.SyncPlayChat.Api;
 public class SyncPlayChatController : ControllerBase
 {
     private readonly ISessionManager _sessionManager;
-    private readonly IUserManager _userManager;
     private readonly ISyncPlayManager _syncPlayManager;
+    private readonly ChatHistoryStore _chatHistory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SyncPlayChatController"/> class.
     /// </summary>
     /// <param name="sessionManager">The Jellyfin session manager.</param>
-    /// <param name="userManager">The Jellyfin user manager.</param>
     /// <param name="syncPlayManager">The Jellyfin SyncPlay manager.</param>
-    public SyncPlayChatController(ISessionManager sessionManager, IUserManager userManager, ISyncPlayManager syncPlayManager)
+    /// <param name="chatHistory">The recent message store.</param>
+    public SyncPlayChatController(ISessionManager sessionManager, ISyncPlayManager syncPlayManager, ChatHistoryStore chatHistory)
     {
         _sessionManager = sessionManager;
-        _userManager = userManager;
         _syncPlayManager = syncPlayManager;
+        _chatHistory = chatHistory;
+    }
+
+    /// <summary>
+    /// Gets recent messages for the caller's current SyncPlay group.
+    /// </summary>
+    /// <param name="groupId">The preferred SyncPlay group identifier.</param>
+    /// <param name="senderSessionId">The caller's current Jellyfin session identifier.</param>
+    /// <returns>The recent messages visible to the caller.</returns>
+    [HttpGet("History")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<IReadOnlyList<SyncPlayChatMessage>> History([FromQuery] string? groupId, [FromQuery] string? senderSessionId)
+    {
+        Guid userId = ResolveCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return BadRequest("Could not resolve current user id.");
+        }
+
+        var allSessions = _sessionManager.Sessions.ToList();
+        var controllingSession = ResolveControllingSession(allSessions, userId, senderSessionId);
+        if (controllingSession is null)
+        {
+            return BadRequest("Current session not found.");
+        }
+
+        var visibleGroups = ResolveGroupsForSession(controllingSession);
+        var targetGroup = ResolveTargetGroup(visibleGroups, groupId, []);
+        return Ok(targetGroup is null ? [] : _chatHistory.Get(targetGroup.GroupId));
     }
 
     /// <summary>
@@ -64,6 +92,11 @@ public class SyncPlayChatController : ControllerBase
             return BadRequest("Text is required.");
         }
 
+        if (text.Length > 1000)
+        {
+            return BadRequest("Text cannot exceed 1000 characters.");
+        }
+
         string header = string.IsNullOrWhiteSpace(request.Header) ? "SyncPlay Chat" : request.Header.Trim();
         int timeoutMs = request.TimeoutMs is > 0 ? request.TimeoutMs.Value : 4000;
 
@@ -82,7 +115,7 @@ public class SyncPlayChatController : ControllerBase
 
         string controllingSessionId = controllingSession.Id;
 
-        var visibleGroups = _syncPlayManager.ListGroups(controllingSession, new ListGroupsRequest());
+        var visibleGroups = ResolveGroupsForSession(controllingSession);
 
         var participantHints = ParseParticipantHints(request.ParticipantsCsv);
         var targetGroup = ResolveTargetGroup(visibleGroups, request.GroupId, participantHints);
@@ -107,10 +140,12 @@ public class SyncPlayChatController : ControllerBase
             });
         }
 
+        string senderName = string.IsNullOrWhiteSpace(controllingSession.UserName) ? "Someone" : controllingSession.UserName;
+        _chatHistory.Add(targetGroup.GroupId, userId, senderName, text);
         var command = new MessageCommand
         {
             Header = header,
-            Text = text,
+            Text = senderName + ": " + text,
             TimeoutMs = timeoutMs
         };
 
@@ -230,6 +265,11 @@ public class SyncPlayChatController : ControllerBase
         return result;
     }
 
+    private List<GroupInfoDto> ResolveGroupsForSession(SessionInfo session)
+        => _syncPlayManager.ListGroups(session, new ListGroupsRequest())
+            .Where(group => group.Participants.Contains(session.Id, StringComparer.Ordinal))
+            .ToList();
+
     private static GroupInfoDto? ResolveTargetGroup(List<GroupInfoDto> groups, string? requestedGroupId, List<string> participants)
     {
         if (groups.Count == 0)
@@ -282,6 +322,11 @@ public class SyncPlayChatController : ControllerBase
         if (participants.Count == 0)
         {
             return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(session.Id) && participants.Contains(session.Id))
+        {
+            return true;
         }
 
         if (!string.IsNullOrWhiteSpace(session.UserName) && participants.Contains(session.UserName))
