@@ -233,7 +233,7 @@ public sealed class VoiceController : ControllerBase
         if (requireGroup)
         {
             groupId = _syncPlayManager.ListGroups(session, new ListGroupsRequest())
-                .Where(group => group.Participants.Contains(session.Id, StringComparer.Ordinal))
+                .Where(group => group.Participants.Contains(session.UserName, StringComparer.OrdinalIgnoreCase))
                 .Select(group => group.GroupId)
                 .FirstOrDefault();
             if (groupId == Guid.Empty)

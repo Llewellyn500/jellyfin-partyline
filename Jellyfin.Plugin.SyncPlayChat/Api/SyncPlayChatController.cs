@@ -267,7 +267,7 @@ public class SyncPlayChatController : ControllerBase
 
     private List<GroupInfoDto> ResolveGroupsForSession(SessionInfo session)
         => _syncPlayManager.ListGroups(session, new ListGroupsRequest())
-            .Where(group => group.Participants.Contains(session.Id, StringComparer.Ordinal))
+            .Where(group => group.Participants.Contains(session.UserName, StringComparer.OrdinalIgnoreCase))
             .ToList();
 
     private static GroupInfoDto? ResolveTargetGroup(List<GroupInfoDto> groups, string? requestedGroupId, List<string> participants)
