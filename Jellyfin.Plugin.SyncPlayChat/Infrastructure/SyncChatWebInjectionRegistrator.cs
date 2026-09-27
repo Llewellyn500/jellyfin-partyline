@@ -1,4 +1,5 @@
 using System;
+using Jellyfin.Plugin.SyncPlayChat.Voice;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,8 @@ public class SyncChatWebInjectionRegistrator : IPluginServiceRegistrator
     /// <inheritdoc />
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
+        serviceCollection.AddSingleton<VoiceRoomManager>();
+        serviceCollection.AddSingleton<TurnCredentialService>();
         serviceCollection.AddHostedService<SyncChatWebInjectionStartupService>();
     }
 }

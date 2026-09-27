@@ -29,6 +29,10 @@
   <ItemGroup>
     <None Remove="Web\sync-chat.js" />
     <EmbeddedResource Include="Web\sync-chat.js" />
+    <None Remove="Web\voice-chat.js" />
+    <EmbeddedResource Include="Web\voice-chat.js" />
+    <None Remove="Configuration\configPage.html" />
+    <EmbeddedResource Include="Configuration\configPage.html" />
   </ItemGroup>
 
 </Project>

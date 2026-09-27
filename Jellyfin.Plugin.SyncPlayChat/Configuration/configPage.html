@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SyncPlay Chat</title>
+</head>
+<body>
+    <div id="SyncPlayChatConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="SyncPlayChatConfigForm">
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label><input id="EnableVoiceChat" type="checkbox" is="emby-checkbox" /><span>Enable voice chat</span></label>
+                    </div>
+                    <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="StunUrl">STUN URL(s)</label><input id="StunUrl" is="emby-input" /><div class="fieldDescription">Comma-separated. Leave empty for host candidates only.</div></div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label><input id="EnableTurn" type="checkbox" is="emby-checkbox" /><span>Enable TURN</span></label>
+                    </div>
+                    <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="TurnUrl">TURN URL(s)</label><input id="TurnUrl" is="emby-input" placeholder="turn:host:3478?transport=udp, turn:host:3478?transport=tcp" /></div>
+                    <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="TurnTlsUrl">TURN TLS URL(s)</label><input id="TurnTlsUrl" is="emby-input" placeholder="turns:host:5349?transport=tcp" /></div>
+                    <div class="inputContainer"><label class="inputLabel inputLabelUnfocused" for="TurnSharedSecret">coturn shared secret</label><input id="TurnSharedSecret" type="password" is="emby-input" autocomplete="new-password" /><div class="fieldDescription">Stored only in Jellyfin's plugin configuration. Browsers receive short-lived credentials, never this secret.</div></div>
+                    <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                'use strict';
+                const pluginId = 'a69744cc-2281-48bf-adef-8e451a16ff71';
+                const page = document.querySelector('#SyncPlayChatConfigPage');
+                page.addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        page.querySelector('#EnableVoiceChat').checked = config.EnableVoiceChat;
+                        page.querySelector('#StunUrl').value = config.StunUrl || '';
+                        page.querySelector('#EnableTurn').checked = config.EnableTurn;
+                        page.querySelector('#TurnUrl').value = config.TurnUrl || '';
+                        page.querySelector('#TurnTlsUrl').value = config.TurnTlsUrl || '';
+                        page.querySelector('#TurnSharedSecret').value = config.TurnSharedSecret || '';
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+                page.querySelector('#SyncPlayChatConfigForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        config.EnableVoiceChat = page.querySelector('#EnableVoiceChat').checked;
+                        config.StunUrl = page.querySelector('#StunUrl').value.trim();
+                        config.EnableTurn = page.querySelector('#EnableTurn').checked;
+                        config.TurnUrl = page.querySelector('#TurnUrl').value.trim();
+                        config.TurnTlsUrl = page.querySelector('#TurnTlsUrl').value.trim();
+                        config.TurnSharedSecret = page.querySelector('#TurnSharedSecret').value;
+                        return ApiClient.updatePluginConfiguration(pluginId, config);
+                    }).then(Dashboard.processPluginConfigurationUpdateResult);
+                    return false;
+                });
+            })();
+        </script>
+    </div>
+</body>
+</html>

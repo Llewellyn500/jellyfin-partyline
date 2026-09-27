@@ -3,23 +3,7 @@ using MediaBrowser.Model.Plugins;
 namespace Jellyfin.Plugin.SyncPlayChat.Configuration;
 
 /// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
-{
-    /// <summary>
-    /// Option one.
-    /// </summary>
-    OneOption,
-
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption
-}
-
-/// <summary>
-/// Plugin configuration.
+/// SyncPlay Chat plugin configuration.
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {
@@ -28,30 +12,43 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        // set default options here
-        Options = SomeOptions.AnotherOption;
-        TrueFalseSetting = true;
-        AnInteger = 2;
-        AString = "string";
+        EnableVoiceChat = true;
+        StunUrl = "stun:stun.l.google.com:19302";
+        TurnCredentialLifetimeMinutes = 60;
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
+    /// Gets or sets a value indicating whether voice chat is enabled.
     /// </summary>
-    public bool TrueFalseSetting { get; set; }
+    public bool EnableVoiceChat { get; set; }
 
     /// <summary>
-    /// Gets or sets an integer setting.
+    /// Gets or sets comma-separated STUN URLs.
     /// </summary>
-    public int AnInteger { get; set; }
+    public string StunUrl { get; set; }
 
     /// <summary>
-    /// Gets or sets a string setting.
+    /// Gets or sets a value indicating whether TURN is enabled.
     /// </summary>
-    public string AString { get; set; }
+    public bool EnableTurn { get; set; }
 
     /// <summary>
-    /// Gets or sets an enum option.
+    /// Gets or sets comma-separated TURN URLs, normally UDP and TCP.
     /// </summary>
-    public SomeOptions Options { get; set; }
+    public string? TurnUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets comma-separated TURN TLS URLs.
+    /// </summary>
+    public string? TurnTlsUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets the coturn REST API shared secret. It is never sent to clients.
+    /// </summary>
+    public string? TurnSharedSecret { get; set; }
+
+    /// <summary>
+    /// Gets or sets the temporary TURN credential lifetime in minutes.
+    /// </summary>
+    public int TurnCredentialLifetimeMinutes { get; set; }
 }

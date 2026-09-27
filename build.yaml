@@ -4,13 +4,12 @@ guid: "a69744cc-2281-48bf-adef-8e451a16ff71"
 version: "1.0.0.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
-overview: "Short description about your plugin"
+overview: "Text and private WebRTC voice chat for Jellyfin SyncPlay"
 description: >
-  This is a longer description that can span more than one
-  line and include details about your plugin.
+  Adds Jellyfin-integrated SyncPlay text chat and opt-in WebRTC mesh voice chat
+  with authenticated signaling, adaptive audio, and optional coturn fallback.
 category: "General"
 owner: "jellyfin"
 artifacts:
 - "Jellyfin.Plugin.SyncPlayChat.dll"
-changelog: >
-  changelog
+changelog: "Add native WebRTC SyncPlay voice chat."

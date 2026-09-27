@@ -2,8 +2,8 @@
     {
         "name": "Syncplay Chat",
         "guid": "a69744cc-2281-48bf-adef-8e451a16ff71",
-        "overview": "Adds achat button during SyncPlay sessions.",
-        "description": "Syncplay Chat adds a chat button during SyncPlay sessions and sends chat messages as Jellyfin toasts to devices in the same SyncPlay group.",
+        "overview": "Text and private WebRTC voice chat for Jellyfin SyncPlay.",
+        "description": "Adds SyncPlay text chat plus opt-in WebRTC mesh voice with authenticated signaling, adaptive audio, and optional coturn fallback.",
         "owner": "AbhayVAshokan",
         "category": "General",
         "imageUrl": "https://raw.githubusercontent.com/AbhayVAshokan/jellyfin-syncplay-chat/master/assets/icon.jpg",

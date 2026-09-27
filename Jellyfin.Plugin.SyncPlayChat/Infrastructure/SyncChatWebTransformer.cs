@@ -23,7 +23,7 @@ public static class SyncChatWebTransformer
             return payload.Contents;
         }
 
-        string scriptContent = GetSyncChatScript();
+        string scriptContent = GetEmbeddedScript("sync-chat.js") + GetEmbeddedScript("voice-chat.js");
         if (string.IsNullOrEmpty(scriptContent))
         {
             return payload.Contents;
@@ -40,7 +40,12 @@ public static class SyncChatWebTransformer
     /// <returns>Script content.</returns>
     public static string GetSyncChatScript()
     {
-        const string resourcePath = "Jellyfin.Plugin.SyncPlayChat.Web.sync-chat.js";
+        return GetEmbeddedScript("sync-chat.js");
+    }
+
+    private static string GetEmbeddedScript(string fileName)
+    {
+        string resourcePath = "Jellyfin.Plugin.SyncPlayChat.Web." + fileName;
         using Stream? stream = typeof(SyncChatWebTransformer).Assembly.GetManifestResourceStream(resourcePath);
         if (stream is null)
         {

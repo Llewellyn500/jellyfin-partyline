@@ -9,6 +9,8 @@
     const sendButtonId = 'syncPlayChatSendButton';
     const refreshIntervalMs = 5000;
     let shouldShowButton = false;
+    let currentSessionId = '';
+    let currentGroupId = '';
     let refreshInProgress = false;
     let sendInProgress = false;
 
@@ -265,16 +267,20 @@
     function extractSyncPlayGroupId(session) {
         const playState = session && session.PlayState;
         const groupId = (session && session.PlayState && session.PlayState.SyncPlayGroupId)
-            || (session && session.PlayState && session.PlayState.SyncPlayGroup)
+            || (session && session.PlayState && session.PlayState.SyncPlayGroup && session.PlayState.SyncPlayGroup.Id)
             || (session && session.SyncPlayGroupId)
-            || (session && session.SyncPlayGroup)
             || (session && session.SyncPlayGroup && session.SyncPlayGroup.Id)
-            || (playState && playState.SyncPlayGroup && playState.SyncPlayGroup.Id)
             || (playState && playState.SyncPlayInfo && playState.SyncPlayInfo.GroupId)
             || (session && session.AdditionalData && session.AdditionalData.SyncPlayGroupId)
+            || (session && session.PlayState && session.PlayState.SyncPlayGroup)
+            || (session && session.SyncPlayGroup)
             || '';
 
-        return typeof groupId === 'string' ? groupId : '';
+        if (typeof groupId === 'string') {
+            return groupId;
+        }
+
+        return groupId && typeof groupId === 'object' ? (groupId.Id || groupId.GroupId || '') : '';
     }
 
     function removeExtraButtons() {
@@ -1228,11 +1234,19 @@
 
         const sessions = await fetchSessions();
         const matchingUserSessions = sessions.filter(matchesCurrentUser);
+        const currentSession = getCurrentSession(sessions);
+        currentSessionId = currentSession && currentSession.Id || '';
+        currentGroupId = currentSession && extractSyncPlayGroupId(currentSession) || '';
         if (matchingUserSessions.length === 0) {
+            currentSessionId = '';
+            currentGroupId = '';
             return false;
         }
 
         if (matchingUserSessions.some(hasSyncPlayGroup)) {
+            if (!currentGroupId) {
+                currentGroupId = getGroupIdsForCurrentUserSessions(sessions)[0] || '';
+            }
             return true;
         }
 
@@ -1240,11 +1254,16 @@
             const groupsResponse = await fetchJson('SyncPlay/List');
             const groups = normalizeGroupsResponse(groupsResponse);
             if (groups.length > 0) {
-                if (groupsContainCurrentUser(groups, sessions)) {
+                const matchingGroup = groups.find(function (group) {
+                    return groupsContainCurrentUser([group], sessions);
+                });
+                if (matchingGroup) {
+                    currentGroupId = resolveSyncPlayGroupId(matchingGroup);
                     return true;
                 }
 
                 if (await isCurrentUserInGroupsViaDetails(groups, sessions)) {
+                    currentGroupId = groups.length === 1 ? resolveSyncPlayGroupId(groups[0]) : currentGroupId;
                     return true;
                 }
             }
@@ -1255,6 +1274,7 @@
         logDebug('Current user not in any SyncPlay group', {
             matchingUserSessions: matchingUserSessions.length
         });
+        currentGroupId = '';
         return false;
     }
 
@@ -1273,6 +1293,9 @@
         } finally {
             refreshInProgress = false;
             addButton();
+            window.dispatchEvent(new CustomEvent('syncplaychatcontext', {
+                detail: { inGroup: shouldShowButton, sessionId: currentSessionId, groupId: currentGroupId }
+            }));
         }
     }
 
@@ -1318,6 +1341,12 @@
         }
 
         window.__syncPlayChatLoaded = true;
+        window.SyncPlayChatBridge = {
+            getContext: function () {
+                return { inGroup: shouldShowButton, sessionId: currentSessionId, groupId: currentGroupId };
+            },
+            refresh: refreshSyncPlayState
+        };
 
         const observer = new MutationObserver(addButton);
         observer.observe(document.body, { childList: true, subtree: true });
