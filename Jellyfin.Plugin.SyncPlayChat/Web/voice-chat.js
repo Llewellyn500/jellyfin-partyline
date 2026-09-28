@@ -243,6 +243,9 @@
 
         updateLocalId(id) {
             this.localId = id;
+            this.peers.forEach((record) => {
+                record.polite = this.localId > record.id;
+            });
         }
 
         async updateIceServers() {
@@ -462,6 +465,20 @@
                     }
                 }, delay + Math.random() * 500);
             }
+        }
+
+        async restartConnections() {
+            const attempts = [];
+            this.peers.forEach((record) => {
+                window.clearTimeout(record.reconnectTimer);
+                record.retry = 0;
+                record.canOffer = true;
+                if (record.pc.restartIce) {
+                    record.pc.restartIce();
+                }
+                attempts.push(this.negotiate(record, true));
+            });
+            await Promise.all(attempts);
         }
 
         rebuild(record) {
@@ -785,6 +802,7 @@
                 this.cursor = joined.cursor || this.cursor;
                 this.peers.updateLocalId(this.participant.participantId);
                 this.peers.reconcile(joined.participants, true);
+                await this.peers.restartConnections();
                 this.signalRetry = 0;
                 this.state = 'CONNECTED';
                 this.setStatus('Connected');
