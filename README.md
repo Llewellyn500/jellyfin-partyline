@@ -12,6 +12,8 @@ https://github.com/user-attachments/assets/69be29fa-b328-45c5-9967-f9582b0dd7d1
     - Without File Transformation, `sync-chat.js` will not be injected into the web client.
 - HTTPS for microphone access when Jellyfin is not running on localhost.
 
+For a complete Caddy setup covering trusted HTTPS on a private LAN, Tailscale HTTPS, Windows startup, verification, and troubleshooting, see [Caddy HTTPS setup](docs/caddy-https.md).
+
 ## Voice chat
 
 Join a SyncPlay group, then choose `🎙 Join Voice`. Microphone permission is requested only after that click. Mute disables the existing microphone track; it does not reconnect or renegotiate. Leaving voice does not leave SyncPlay, pause playback, or affect text chat.
