@@ -59,6 +59,16 @@
         return !!getFullscreenElement();
     }
 
+    function isMediaPlaying() {
+        return Array.prototype.some.call(document.querySelectorAll('video, audio'), function (media) {
+            return !media.__syncPlayVoiceAudio && media.paused === false && !media.ended;
+        });
+    }
+
+    function isCompactMode() {
+        return isFullscreenMode() || isMediaPlaying();
+    }
+
     function placeFloatingHost(host) {
         const parent = getFullscreenElement() || document.body;
         if (host.parentNode !== parent) {
@@ -87,7 +97,7 @@
     }
 
     function styleChatButton(button) {
-        const fullscreen = isFullscreenMode();
+        const fullscreen = isCompactMode();
         const label = button.querySelector('[data-chat-label]');
         button.style.padding = fullscreen ? '0.38rem 0.65rem' : '0.48rem 0.92rem';
         button.style.borderRadius = fullscreen ? '999px' : '0.6rem';
@@ -442,7 +452,7 @@
     function scheduleComposerCollapse() {
         window.clearTimeout(composerCollapseTimer);
         composerCollapseTimer = 0;
-        if (!isFullscreenMode() || !isComposerOpen()) {
+        if (!isCompactMode() || !isComposerOpen()) {
             return;
         }
         composerCollapseTimer = window.setTimeout(hideComposer, fullscreenCollapseMs);
@@ -1605,6 +1615,17 @@
         };
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+        ['play', 'playing', 'pause', 'ended'].forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                if (event.target && event.target.__syncPlayVoiceAudio) {
+                    return;
+                }
+                if (isCompactMode()) {
+                    hideComposer();
+                }
+                addButton();
+            }, true);
+        });
 
         refreshSyncPlayState();
         window.setInterval(refreshSyncPlayState, refreshIntervalMs);

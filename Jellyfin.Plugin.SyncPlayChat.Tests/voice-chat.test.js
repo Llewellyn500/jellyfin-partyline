@@ -32,6 +32,7 @@ let audioElements = 0;
 let addedTracks = 0;
 context.document = {
     body: { appendChild() {} },
+    querySelectorAll() { return []; },
     createElement() {
         audioElements += 1;
         return { style: {}, play: async function () {}, remove() {}, srcObject: null };
@@ -61,6 +62,12 @@ assert.equal(peers.peers.size, 1);
 assert.equal(audioElements, 1);
 assert.equal(addedTracks, 1);
 peers.close();
+
+const isCompactMode = window.__SyncPlayVoiceTest.isCompactMode;
+context.document.querySelectorAll = () => [{ paused: false, ended: false, __syncPlayVoiceAudio: true }];
+assert.equal(isCompactMode(), false);
+context.document.querySelectorAll = () => [{ paused: false, ended: false }];
+assert.equal(isCompactMode(), true);
 
 const getAuthHeaders = window.__SyncPlayVoiceTest.getAuthHeaders;
 assert.equal(Object.keys(getAuthHeaders()).length, 0);

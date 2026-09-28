@@ -33,6 +33,16 @@
         return !!(document.fullscreenElement || document.webkitFullscreenElement);
     }
 
+    function isMediaPlaying() {
+        return Array.prototype.some.call(document.querySelectorAll('video, audio'), function (media) {
+            return !media.__syncPlayVoiceAudio && media.paused === false && !media.ended;
+        });
+    }
+
+    function isCompactMode() {
+        return isFullscreenMode() || isMediaPlaying();
+    }
+
     function qualityDecision(profile, badSamples, goodSamples, loss, jitter, rtt) {
         const poor = loss > 0.08 || jitter > 80 || rtt > 800;
         const degraded = poor || loss >= 0.03 || jitter >= 30 || rtt >= 250;
@@ -278,6 +288,7 @@
             }
 
             const audio = document.createElement('audio');
+            audio.__syncPlayVoiceAudio = true;
             audio.autoplay = true;
             audio.playsInline = true;
             audio.style.display = 'none';
@@ -499,8 +510,15 @@
             window.addEventListener('offline', () => this.setStatus('Reconnecting…'));
             window.addEventListener('online', () => this.recoverSignaling());
             window.addEventListener('beforeunload', () => this.cleanup(false));
-            document.addEventListener('fullscreenchange', () => this.updateFullscreenUi(true));
-            document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenUi(true));
+            document.addEventListener('fullscreenchange', () => this.updateCompactUi(true));
+            document.addEventListener('webkitfullscreenchange', () => this.updateCompactUi(true));
+            ['play', 'playing', 'pause', 'ended'].forEach((eventName) => {
+                document.addEventListener(eventName, (event) => {
+                    if (!event.target || !event.target.__syncPlayVoiceAudio) {
+                        this.updateCompactUi(eventName === 'play' || eventName === 'playing');
+                    }
+                }, true);
+            });
             const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
             if (context) {
                 this.onContext(context);
@@ -570,7 +588,7 @@
         scheduleFullscreenCollapse() {
             window.clearTimeout(this.collapseTimer);
             this.collapseTimer = 0;
-            if (!isFullscreenMode() || this.panel.style.display === 'none') {
+            if (!isCompactMode() || this.panel.style.display === 'none') {
                 return;
             }
             this.collapseTimer = window.setTimeout(() => {
@@ -579,11 +597,11 @@
             }, fullscreenCollapseMs);
         }
 
-        updateFullscreenUi(collapsePanel) {
+        updateCompactUi(collapsePanel) {
             if (this.state === 'DISCONNECTED') {
                 return;
             }
-            const fullscreen = isFullscreenMode();
+            const fullscreen = isCompactMode();
             this.button.textContent = '🎙 Voice';
             this.button.setAttribute('aria-label', 'Toggle SyncPlay voice controls');
             this.button.style.display = fullscreen ? 'inline-flex' : 'none';
@@ -617,7 +635,7 @@
                 this.button.setAttribute('aria-label', 'Join SyncPlay voice chat');
                 this.button.style.display = context && context.inGroup ? 'inline-flex' : 'none';
             } else {
-                this.updateFullscreenUi(false);
+                this.updateCompactUi(false);
             }
             if (this.state !== 'DISCONNECTED' && (!context.inGroup
                 || (previousSession && previousSession !== this.sessionId)
@@ -668,7 +686,7 @@
                 this.panel.querySelector('[data-voice-leave]').textContent = '🚪 Leave voice';
                 this.setStatus('Connected');
                 this.renderParticipants();
-                this.updateFullscreenUi(true);
+                this.updateCompactUi(true);
                 this.heartbeatTimer = window.setInterval(() => this.heartbeat(), heartbeatMs);
                 this.pollEvents();
             } catch (error) {
@@ -870,7 +888,7 @@
     }
 
     if (window.__SYNCPLAYVOICE_TEST__) {
-        window.__SyncPlayVoiceTest = { qualityDecision: qualityDecision, PeerManager: PeerManager, getAuthHeaders: getAuthHeaders };
+        window.__SyncPlayVoiceTest = { qualityDecision: qualityDecision, PeerManager: PeerManager, getAuthHeaders: getAuthHeaders, isCompactMode: isCompactMode };
         return;
     }
 
