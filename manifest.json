@@ -2,8 +2,8 @@
     {
         "name": "Partyline",
         "guid": "9512396d-7364-4d1f-aa1a-aa719e8ee3ff",
-        "overview": "Text and private WebRTC voice chat for Jellyfin SyncPlay.",
-        "description": "Adds SyncPlay text chat plus opt-in WebRTC mesh voice with authenticated signaling, adaptive audio, and optional coturn fallback.",
+        "overview": "A Syncplay Chat fork adding private WebRTC voice to Jellyfin SyncPlay.",
+        "description": "Keeps the original SyncPlay text chat and adds opt-in WebRTC mesh voice with authenticated signaling, adaptive audio, and optional coturn fallback.",
         "owner": "Llewellyn500",
         "category": "General",
         "imageUrl": "https://raw.githubusercontent.com/Llewellyn500/jellyfin-partyline/main/assets/icon.png",

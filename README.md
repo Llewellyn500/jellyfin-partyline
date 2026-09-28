@@ -4,7 +4,7 @@
 
 <p align="center"><img src="assets/icon.png" alt="Partyline icon" width="220"></p>
 
-Partyline is independently maintained by [Llewellyn500](https://github.com/Llewellyn500). It began as a fork of [Syncplay Chat](https://github.com/AbhayVAshokan/jellyfin-syncplay-chat), retains its GPL license and history, and now has its own name, plugin ID, assembly, API routes, artwork, repository, releases, and installation feed.
+Partyline is a fork of [Syncplay Chat](https://github.com/AbhayVAshokan/jellyfin-syncplay-chat) by Abhay V Ashokan. It keeps the original SyncPlay text chat and adds opt-in WebRTC voice chat, persistent history, mobile controls, and connection recovery. This fork is independently maintained by [Llewellyn500](https://github.com/Llewellyn500), retains the original GPL license and Git history, and uses its own plugin identity and release feed.
 
 ## Pre-requisites
 
@@ -47,6 +47,8 @@ Open Dashboard > Plugins > Partyline:
 - **coturn shared secret** — stored server-side and never returned to browsers
 
 TURN is optional on simple LANs but strongly recommended for remote users, carrier-grade NAT, and restrictive networks. The plugin creates coturn REST credentials that expire after approximately one hour.
+
+Caddy does not replace coturn: Caddy supplies HTTPS for the Jellyfin page and signaling API, while coturn is only a fallback relay for WebRTC audio. Leave TURN disabled for a normal LAN or Tailscale deployment unless direct voice connections fail.
 
 ### coturn Docker example
 

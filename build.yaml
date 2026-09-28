@@ -4,10 +4,10 @@ guid: "9512396d-7364-4d1f-aa1a-aa719e8ee3ff"
 version: "1.0.0.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
-overview: "Text and private WebRTC voice chat for Jellyfin SyncPlay"
+overview: "A Syncplay Chat fork adding private WebRTC voice to Jellyfin SyncPlay"
 description: >
-  Adds Jellyfin-integrated SyncPlay text chat and opt-in WebRTC mesh voice chat
-  with authenticated signaling, adaptive audio, and optional coturn fallback.
+  Keeps the original Jellyfin SyncPlay text chat and adds opt-in WebRTC mesh
+  voice with authenticated signaling, adaptive audio, and optional coturn fallback.
 category: "General"
 owner: "Llewellyn500"
 artifacts:
