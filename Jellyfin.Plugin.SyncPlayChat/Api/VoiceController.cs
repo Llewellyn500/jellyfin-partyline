@@ -212,18 +212,35 @@ public sealed class VoiceController : ControllerBase
 
     private Identity? ResolveIdentity(string? requestedSessionId, bool requireGroup)
     {
-        Guid userId = ReadGuidClaim("Jellyfin-UserId");
-        string deviceId = ReadClaim("Jellyfin-DeviceId");
-        if (userId == Guid.Empty || string.IsNullOrWhiteSpace(deviceId))
+        Guid userId = ResolveUserId();
+        if (userId == Guid.Empty)
         {
             return null;
         }
 
-        SessionInfo? session = _sessionManager.Sessions
-            .Where(s => s.UserId == userId && string.Equals(s.DeviceId, deviceId, StringComparison.Ordinal))
-            .Where(s => string.IsNullOrWhiteSpace(requestedSessionId) || string.Equals(s.Id, requestedSessionId, StringComparison.Ordinal))
+        string deviceId = ReadClaim("Jellyfin-DeviceId");
+        if (string.IsNullOrWhiteSpace(deviceId))
+        {
+            deviceId = ReadClaim("DeviceId");
+        }
+
+        var userSessions = _sessionManager.Sessions
+            .Where(s => s.UserId == userId)
             .OrderByDescending(s => s.LastActivityDate)
-            .FirstOrDefault();
+            .ToList();
+
+        SessionInfo? session = null;
+        if (!string.IsNullOrWhiteSpace(requestedSessionId))
+        {
+            session = userSessions.FirstOrDefault(s => string.Equals(s.Id, requestedSessionId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (session is null && !string.IsNullOrWhiteSpace(deviceId))
+        {
+            session = userSessions.FirstOrDefault(s => string.Equals(s.DeviceId, deviceId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        session ??= userSessions.FirstOrDefault();
         if (session is null)
         {
             return null;
@@ -244,6 +261,29 @@ public sealed class VoiceController : ControllerBase
         }
 
         return new Identity(userId, session, groupId);
+    }
+
+    private Guid ResolveUserId()
+    {
+        Guid id = ReadGuidClaim("Jellyfin-UserId");
+        if (id != Guid.Empty)
+        {
+            return id;
+        }
+
+        id = ReadGuidClaim(ClaimTypes.NameIdentifier);
+        if (id != Guid.Empty)
+        {
+            return id;
+        }
+
+        id = ReadGuidClaim("sub");
+        if (id != Guid.Empty)
+        {
+            return id;
+        }
+
+        return ReadGuidClaim("UserId");
     }
 
     private string ReadClaim(string type)

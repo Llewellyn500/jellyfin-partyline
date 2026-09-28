@@ -48,10 +48,66 @@
         return window.ApiClient && window.ApiClient.getUrl ? window.ApiClient.getUrl(path) : path;
     }
 
+    function getAuthHeaders() {
+        const headers = {};
+        if (!window.ApiClient) {
+            return headers;
+        }
+
+        if (typeof window.ApiClient.getDefaultHeaders === 'function') {
+            try {
+                const defaults = window.ApiClient.getDefaultHeaders();
+                if (defaults) {
+                    Object.assign(headers, defaults);
+                }
+            } catch (_) {}
+        }
+
+        const token = (typeof window.ApiClient.accessToken === 'function' ? window.ApiClient.accessToken() : '')
+            || window.ApiClient._accessToken
+            || (window.ApiClient._serverInfo && window.ApiClient._serverInfo.AccessToken)
+            || '';
+
+        const deviceId = (typeof window.ApiClient.deviceId === 'function' ? window.ApiClient.deviceId() : '')
+            || window.ApiClient._deviceId
+            || '';
+
+        const deviceName = (typeof window.ApiClient.deviceName === 'function' ? window.ApiClient.deviceName() : '')
+            || window.ApiClient._deviceName
+            || (typeof window.ApiClient.device === 'function' ? window.ApiClient.device() : '')
+            || 'Browser';
+
+        const appName = (typeof window.ApiClient.appName === 'function' ? window.ApiClient.appName() : '')
+            || window.ApiClient._appName
+            || (typeof window.ApiClient.clientName === 'function' ? window.ApiClient.clientName() : '')
+            || 'Jellyfin Web';
+
+        const appVersion = (typeof window.ApiClient.appVersion === 'function' ? window.ApiClient.appVersion() : '')
+            || window.ApiClient._appVersion
+            || (typeof window.ApiClient.clientVersion === 'function' ? window.ApiClient.clientVersion() : '')
+            || '10.10.0';
+
+        if (token) {
+            const authValue = 'MediaBrowser Client="' + appName + '", Device="' + deviceName + '", DeviceId="' + deviceId + '", Version="' + appVersion + '", Token="' + token + '"';
+            if (!headers['Authorization']) {
+                headers['Authorization'] = authValue;
+            }
+            if (!headers['X-Emby-Authorization']) {
+                headers['X-Emby-Authorization'] = authValue;
+            }
+            if (!headers['X-Emby-Token']) {
+                headers['X-Emby-Token'] = token;
+            }
+            if (!headers['X-MediaBrowser-Token']) {
+                headers['X-MediaBrowser-Token'] = token;
+            }
+        }
+
+        return headers;
+    }
+
     async function api(path, method, body, signal) {
-        const headers = new Headers(window.ApiClient && window.ApiClient.getDefaultHeaders
-            ? window.ApiClient.getDefaultHeaders()
-            : undefined);
+        const headers = new Headers(getAuthHeaders());
         if (body !== undefined) {
             headers.set('Content-Type', 'application/json; charset=utf-8');
         }
@@ -744,7 +800,7 @@
     }
 
     if (window.__SYNCPLAYVOICE_TEST__) {
-        window.__SyncPlayVoiceTest = { qualityDecision: qualityDecision, PeerManager: PeerManager };
+        window.__SyncPlayVoiceTest = { qualityDecision: qualityDecision, PeerManager: PeerManager, getAuthHeaders: getAuthHeaders };
         return;
     }
 

@@ -62,4 +62,21 @@ assert.equal(audioElements, 1);
 assert.equal(addedTracks, 1);
 peers.close();
 
-console.log('voice quality hysteresis and duplicate-peer checks passed');
+const getAuthHeaders = window.__SyncPlayVoiceTest.getAuthHeaders;
+assert.equal(Object.keys(getAuthHeaders()).length, 0);
+
+window.ApiClient = {
+    accessToken: () => 'test-token-123',
+    deviceId: () => 'dev-456',
+    deviceName: () => 'TestDevice',
+    appName: () => 'Jellyfin Web Test',
+    appVersion: () => '10.10.1'
+};
+
+const headers = getAuthHeaders();
+assert.equal(headers['X-Emby-Token'], 'test-token-123');
+assert.equal(headers['X-MediaBrowser-Token'], 'test-token-123');
+assert.equal(headers['Authorization'], 'MediaBrowser Client="Jellyfin Web Test", Device="TestDevice", DeviceId="dev-456", Version="10.10.1", Token="test-token-123"');
+assert.equal(headers['X-Emby-Authorization'], 'MediaBrowser Client="Jellyfin Web Test", Device="TestDevice", DeviceId="dev-456", Version="10.10.1", Token="test-token-123"');
+
+console.log('voice quality hysteresis, duplicate-peer, and auth header checks passed');
