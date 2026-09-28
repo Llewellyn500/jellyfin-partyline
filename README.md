@@ -1,15 +1,17 @@
-# Syncplay Chat
+# Jellyfin Partyline
 
-`Syncplay Chat` adds text chat and opt-in voice chat to Jellyfin SyncPlay. Text messages appear as Jellyfin toasts and in a mobile-friendly panel containing the room's latest 100 messages. Voice is direct browser-to-browser WebRTC audio with Jellyfin used only for authenticated signaling.
+`Partyline` adds text chat and opt-in voice chat to Jellyfin SyncPlay. Text messages appear as Jellyfin toasts and in a mobile-friendly panel containing the room's latest 100 messages. Voice is direct browser-to-browser WebRTC audio with Jellyfin used only for authenticated signaling.
 
-https://github.com/user-attachments/assets/69be29fa-b328-45c5-9967-f9582b0dd7d1
+<p align="center"><img src="assets/icon.png" alt="Partyline icon" width="220"></p>
+
+Partyline is independently maintained by [Llewellyn500](https://github.com/Llewellyn500). It began as a fork of [Syncplay Chat](https://github.com/AbhayVAshokan/jellyfin-syncplay-chat), retains its GPL license and history, and now has its own name, plugin ID, assembly, API routes, artwork, repository, releases, and installation feed.
 
 ## Pre-requisites
 
 - Jellyfin server compatible with `Jellyfin.Controller` / `Jellyfin.Model` `10.11.8`.
 - .NET SDK 9.0 for building.
 - Jellyfin [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) plugin installed and enabled.
-    - Without File Transformation, `sync-chat.js` will not be injected into the web client.
+    - Without File Transformation, `partyline.js` will not be injected into the web client.
 - HTTPS for microphone access when Jellyfin is not running on localhost.
 
 For a complete Caddy setup covering trusted HTTPS on a private LAN, Tailscale HTTPS, Windows startup, verification, and troubleshooting, see [Caddy HTTPS setup](docs/caddy-https.md).
@@ -35,7 +37,7 @@ Open the chat button while in a SyncPlay group to read and send messages. Jellyf
 
 ### Voice configuration
 
-Open Dashboard > Plugins > SyncPlay Chat:
+Open Dashboard > Plugins > Partyline:
 
 - **Enable voice chat**
 - **STUN URL(s)** — comma-separated; the default is `stun:stun.l.google.com:19302`
@@ -89,14 +91,16 @@ Voice is never recorded, stored, logged, or transcribed. Participant identity is
 
 ## Installation
 
+If `SyncPlay Chat` is installed, uninstall it and restart Jellyfin first. Running both plugins would inject two sets of controls.
+
 1. In Jellyfin, go to Dashboard > Plugins > Catalog > ⚙️
-2. Click ➕ and give the repository a name (e.g., "Jellfin SyncPlay Chat").
+2. Click ➕ and give the repository a name (e.g., "Jellyfin Partyline").
 3. Set the Repository URL to:
     ```
-    https://raw.githubusercontent.com/AbhayVAshokan/jellyfin-syncplay-chat/master/manifest.json
+    https://raw.githubusercontent.com/Llewellyn500/jellyfin-partyline/main/manifest.json
     ```
 4. Click Save.
-5. Go to the Catalog tab, find `SyncPlay Chat` in the list, and click Install.
+5. Go to the Catalog tab, find `Partyline` in the list, and click Install.
 6. Restart your Jellyfin server to complete the installation.
 
 ## Local Development Deploy
@@ -116,7 +120,7 @@ Environment overrides:
 
 ```bash
 JELLYFIN_DATA_DIR="$HOME/Library/Application Support/jellyfin" \
-PLUGIN_DIR="$HOME/Library/Application Support/jellyfin/plugins/SyncPlayChat" \
+PLUGIN_DIR="$HOME/Library/Application Support/jellyfin/plugins/Partyline" \
 ./scripts/deploy-dev.sh
 ```
 
@@ -131,18 +135,18 @@ Notes:
 Build:
 
 ```bash
-mise exec dotnet@9.0 -- dotnet publish Jellyfin.Plugin.SyncPlayChat/Jellyfin.Plugin.SyncPlayChat.csproj -c Release
+mise exec dotnet@9.0 -- dotnet publish Jellyfin.Plugin.Partyline/Jellyfin.Plugin.Partyline.csproj -c Release
 ```
 
 Output:
 
-- `Jellyfin.Plugin.SyncPlayChat/bin/Release/net9.0/publish/`
+- `Jellyfin.Plugin.Partyline/bin/Release/net9.0/publish/`
 
 Install manually by copying publish output into a plugin folder such as:
 
-- macOS: `$HOME/Library/Application Support/jellyfin/plugins/SyncPlayChat`
-- Linux: `$HOME/.local/share/jellyfin/plugins/SyncPlayChat`
-- Windows: `%LOCALAPPDATA%\jellyfin\plugins\SyncPlayChat`
+- macOS: `$HOME/Library/Application Support/jellyfin/plugins/Partyline`
+- Linux: `$HOME/.local/share/jellyfin/plugins/Partyline`
+- Windows: `%ProgramData%\Jellyfin\Server\plugins\Partyline`
 
 Then restart Jellyfin.
 
@@ -150,15 +154,15 @@ Then restart Jellyfin.
 
 1. Publish release output:
     ```bash
-    dotnet publish Jellyfin.Plugin.SyncPlayChat/Jellyfin.Plugin.SyncPlayChat.csproj -c Release
+    dotnet publish Jellyfin.Plugin.Partyline/Jellyfin.Plugin.Partyline.csproj -c Release
     ```
-2. Zip the contents of `Jellyfin.Plugin.SyncPlayChat/bin/Release/net9.0/publish/` (not the folder itself):
+2. Zip the contents of `Jellyfin.Plugin.Partyline/bin/Release/net9.0/publish/` (not the folder itself):
     ```bash
-    cd Jellyfin.Plugin.SyncPlayChat/bin/Release/net9.0/publish
-    zip -r Jellyfin.Plugin.SyncPlayChat_<version>.zip .
+    cd Jellyfin.Plugin.Partyline/bin/Release/net9.0/publish
+    zip -r Jellyfin.Plugin.Partyline_<version>.zip .
     ```
 3. Create a new GitHub release with tag `v<version>` (e.g., `v1.0.2.0`).
-4. Attach the zip file (`Jellyfin.Plugin.SyncPlayChat_<version>.zip`) to the release.
+4. Attach the zip file (`Jellyfin.Plugin.Partyline_<version>.zip`) to the release.
 5. Add release notes in the release body describing what changed.
 6. Publish the release.
 
@@ -166,9 +170,9 @@ The `release.yaml` workflow will automatically:
 - Compute the checksum of the attached zip.
 - Prepend a new version entry to `manifest.json`.
 - Update `Directory.Build.props` with the new version.
-- Commit and push to `master`.
+- Commit and push to `main`.
 
-Plugin ID: `a69744cc-2281-48bf-adef-8e451a16ff71`
+Plugin ID: `9512396d-7364-4d1f-aa1a-aa719e8ee3ff`
 
 ## Troubleshooting
 
@@ -177,7 +181,7 @@ Plugin ID: `a69744cc-2281-48bf-adef-8e451a16ff71`
     - Verify File Transformation plugin is installed and enabled.
     - Restart Jellyfin after plugin deploy/update.
 - Messages only appear on one device:
-    - Check browser console for `[SyncPlayChat]` send failure logs.
+    - Check browser console for `[Partyline]` send failure logs.
     - Confirm target devices are active sessions visible to Jellyfin.
 - `Voice chat requires HTTPS`:
     - Use HTTPS through your Jellyfin reverse proxy. Browsers normally allow insecure microphone access only on localhost.
@@ -193,15 +197,15 @@ Plugin ID: `a69744cc-2281-48bf-adef-8e451a16ff71`
 ## Development checks
 
 ```bash
-dotnet build Jellyfin.Plugin.SyncPlayChat.sln -c Release
-dotnet test Jellyfin.Plugin.SyncPlayChat.sln -c Release
-node --check Jellyfin.Plugin.SyncPlayChat/Web/sync-chat.js
-node --check Jellyfin.Plugin.SyncPlayChat/Web/voice-chat.js
-node Jellyfin.Plugin.SyncPlayChat.Tests/voice-chat.test.js
+dotnet build Jellyfin.Plugin.Partyline.sln -c Release
+dotnet test Jellyfin.Plugin.Partyline.sln -c Release
+node --check Jellyfin.Plugin.Partyline/Web/partyline.js
+node --check Jellyfin.Plugin.Partyline/Web/voice-chat.js
+node Jellyfin.Plugin.Partyline.Tests/voice-chat.test.js
 ```
 
 The automated suite covers idempotent join, the atomic 10-user cap, participant 11 rejection, same-room signaling, cross-room isolation, sender authorization, and TURN secret non-disclosure. Real NAT traversal, microphone behavior, network switching, and browser autoplay policies still require multi-device testing against a running Jellyfin and coturn deployment.
 
 ## License
 
-See `LICENSE`.
+Partyline is free software under the GNU General Public License v3. See `LICENSE`. The repository retains the upstream project history and attribution.

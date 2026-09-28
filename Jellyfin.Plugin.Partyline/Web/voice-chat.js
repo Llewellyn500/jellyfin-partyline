@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const hostId = 'syncPlayChatFloatingHost';
+    const hostId = 'partylineFloatingHost';
     const buttonId = 'syncPlayVoiceButton';
     const panelId = 'syncPlayVoicePanel';
     const heartbeatMs = 10000;
@@ -523,7 +523,7 @@
             this.collapseTimer = 0;
             this.stopped = false;
             this.createUi();
-            window.addEventListener('syncplaychatcontext', (event) => this.onContext(event.detail));
+            window.addEventListener('partylinecontext', (event) => this.onContext(event.detail));
             window.addEventListener('offline', () => this.setStatus('Reconnecting…'));
             window.addEventListener('online', () => this.recoverSignaling());
             window.addEventListener('beforeunload', () => this.cleanup(false));
@@ -536,7 +536,7 @@
                     }
                 }, true);
             });
-            const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
+            const context = window.PartylineBridge && window.PartylineBridge.getContext();
             if (context) {
                 this.onContext(context);
             }
@@ -678,7 +678,7 @@
             this.state = 'REQUESTING_MIC';
             this.button.disabled = true;
             try {
-                const eligibility = await api('SyncPlayChat/Voice/Eligibility?sessionId=' + encodeURIComponent(this.sessionId));
+                const eligibility = await api('Partyline/Voice/Eligibility?sessionId=' + encodeURIComponent(this.sessionId));
                 try {
                     this.stream = await navigator.mediaDevices.getUserMedia({
                         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: { ideal: 1 } },
@@ -691,7 +691,7 @@
                     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 }
                 this.state = 'JOINING';
-                const joined = await api('SyncPlayChat/Voice/Join', 'POST', { SessionId: this.sessionId });
+                const joined = await api('Partyline/Voice/Join', 'POST', { SessionId: this.sessionId });
                 this.participant = joined.participant;
                 this.joinedGroupId = normalizeId(joined.groupId || eligibility.groupId);
                 this.cursor = joined.cursor || 0;
@@ -715,7 +715,7 @@
         }
 
         async getIceServers() {
-            return api('SyncPlayChat/Voice/IceConfiguration?sessionId=' + encodeURIComponent(this.sessionId));
+            return api('Partyline/Voice/IceConfiguration?sessionId=' + encodeURIComponent(this.sessionId));
         }
 
         async sendSignal(targetId, type, payload) {
@@ -723,7 +723,7 @@
                 return;
             }
             try {
-                await api('SyncPlayChat/Voice/Signal', 'POST', {
+                await api('Partyline/Voice/Signal', 'POST', {
                     SessionId: this.sessionId,
                     ParticipantId: this.participant.participantId,
                     TargetParticipantId: targetId,
@@ -743,7 +743,7 @@
                 }
                 this.pollController = new AbortController();
                 try {
-                    const events = await api('SyncPlayChat/Voice/Events?sessionId=' + encodeURIComponent(this.sessionId) +
+                    const events = await api('Partyline/Voice/Events?sessionId=' + encodeURIComponent(this.sessionId) +
                         '&participantId=' + encodeURIComponent(this.participant.participantId) + '&cursor=' + this.cursor,
                     'GET', undefined, this.pollController.signal);
                     this.signalRetry = 0;
@@ -773,7 +773,7 @@
                 return;
             }
             try {
-                const participants = await api('SyncPlayChat/Voice/Heartbeat', 'POST', {
+                const participants = await api('Partyline/Voice/Heartbeat', 'POST', {
                     SessionId: this.sessionId,
                     ParticipantId: this.participant.participantId
                 });
@@ -791,12 +791,12 @@
                 return;
             }
             try {
-                const eligibility = await api('SyncPlayChat/Voice/Eligibility?sessionId=' + encodeURIComponent(this.sessionId));
+                const eligibility = await api('Partyline/Voice/Eligibility?sessionId=' + encodeURIComponent(this.sessionId));
                 if (this.joinedGroupId && normalizeId(eligibility.groupId) !== this.joinedGroupId) {
                     await this.cleanup(true);
                     return;
                 }
-                const joined = await api('SyncPlayChat/Voice/Join', 'POST', { SessionId: this.sessionId });
+                const joined = await api('Partyline/Voice/Join', 'POST', { SessionId: this.sessionId });
                 this.participant = joined.participant;
                 this.joinedGroupId = normalizeId(joined.groupId);
                 this.cursor = joined.cursor || this.cursor;
@@ -858,11 +858,11 @@
             this.button.setAttribute('aria-label', 'Join SyncPlay voice chat');
             this.button.style.padding = '0.48rem 0.92rem';
             this.button.style.borderRadius = '0.6rem';
-            const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
+            const context = window.PartylineBridge && window.PartylineBridge.getContext();
             this.button.style.display = isSecureVoicePage() && context && context.inGroup ? 'inline-flex' : 'none';
             if (notifyServer && sessionId) {
                 try {
-                    await api('SyncPlayChat/Voice/Leave', 'POST', { SessionId: sessionId });
+                    await api('Partyline/Voice/Leave', 'POST', { SessionId: sessionId });
                 } catch (error) {
                     log('Voice leave will be completed by heartbeat expiry', error);
                 }

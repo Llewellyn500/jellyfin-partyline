@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>Jellyfin.Plugin.SyncPlayChat</RootNamespace>
-    <AssemblyName>Jellyfin.Plugin.SyncPlayChat</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.Partyline</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.Partyline</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Web\sync-chat.js" />
-    <EmbeddedResource Include="Web\sync-chat.js" />
+    <None Remove="Web\partyline.js" />
+    <EmbeddedResource Include="Web\partyline.js" />
     <None Remove="Web\voice-chat.js" />
     <EmbeddedResource Include="Web\voice-chat.js" />
     <None Remove="Configuration\configPage.html" />

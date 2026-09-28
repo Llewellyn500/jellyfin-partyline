@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.SyncPlayChat.Api;
-using Jellyfin.Plugin.SyncPlayChat.Configuration;
-using Jellyfin.Plugin.SyncPlayChat.Infrastructure;
-using Jellyfin.Plugin.SyncPlayChat.Voice;
+using Jellyfin.Plugin.Partyline.Api;
+using Jellyfin.Plugin.Partyline.Configuration;
+using Jellyfin.Plugin.Partyline.Infrastructure;
+using Jellyfin.Plugin.Partyline.Voice;
 using Xunit;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Tests;
+namespace Jellyfin.Plugin.Partyline.Tests;
 
 public sealed class VoiceRoomManagerTests
 {
@@ -35,10 +35,10 @@ public sealed class VoiceRoomManagerTests
     public void WebTransformerInjectsTextAndVoiceOnce()
     {
         const string html = "<html><body>Jellyfin</body></html>";
-        string transformed = SyncChatWebTransformer.TransformIndexHtml(new WebContentTransformPayload { Contents = html });
-        string repeated = SyncChatWebTransformer.TransformIndexHtml(new WebContentTransformPayload { Contents = transformed });
+        string transformed = PartylineWebTransformer.TransformIndexHtml(new WebContentTransformPayload { Contents = html });
+        string repeated = PartylineWebTransformer.TransformIndexHtml(new WebContentTransformPayload { Contents = transformed });
 
-        Assert.Contains("__syncPlayChatLoaded", transformed, StringComparison.Ordinal);
+        Assert.Contains("__partylineLoaded", transformed, StringComparison.Ordinal);
         Assert.Contains("__syncPlayVoiceLoaded", transformed, StringComparison.Ordinal);
         Assert.Equal(transformed, repeated);
     }

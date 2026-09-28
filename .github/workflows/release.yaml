@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
 
       - name: Parse version from release tag
         id: version
@@ -25,7 +25,7 @@ jobs:
 
       - name: Download release asset and compute checksum
         run: |
-          ASSET_NAME="Jellyfin.Plugin.SyncPlayChat_${{ steps.version.outputs.version }}.zip"
+          ASSET_NAME="Jellyfin.Plugin.Partyline_${{ steps.version.outputs.version }}.zip"
           gh release download "${{ github.event.release.tag_name }}" \
             --pattern "${ASSET_NAME}" \
             --dir /tmp
@@ -45,7 +45,7 @@ jobs:
             const body = context.payload.release.body || '';
             const changelog = body.replace(/\r\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
             const now = new Date().toISOString().replace(/\.\d{3}Z$/, '');
-            const sourceUrl = `https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/Jellyfin.Plugin.SyncPlayChat_${version}.zip`;
+            const sourceUrl = `https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/Jellyfin.Plugin.Partyline_${version}.zip`;
 
             const newEntry = {
               changelog,
@@ -56,7 +56,12 @@ jobs:
               timestamp: now
             };
 
-            manifest[0].versions.unshift(newEntry);
+            const existing = manifest[0].versions.findIndex(entry => entry.version === version);
+            if (existing >= 0) {
+              manifest[0].versions[existing] = newEntry;
+            } else {
+              manifest[0].versions.unshift(newEntry);
+            }
             fs.writeFileSync('manifest.json', JSON.stringify(manifest, null, 4) + '\n');
 
       - name: Update Directory.Build.props
@@ -68,8 +73,8 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.name "[Bot] Abhay V Ashokan"
-          git config user.email "abhayvashokan@gmail.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add manifest.json Directory.Build.props
           git commit -m "release: update manifest and version to ${{ steps.version.outputs.version }}"
           git push

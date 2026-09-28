@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 #pragma warning disable SA1611 // Public method summaries describe the compact identity parameter set.
 #pragma warning disable SA1615 // Public method summaries describe their results.
 
-namespace Jellyfin.Plugin.SyncPlayChat.Voice;
+namespace Jellyfin.Plugin.Partyline.Voice;
 
 /// <summary>
 /// Thread-safe, in-memory voice presence and signaling store.

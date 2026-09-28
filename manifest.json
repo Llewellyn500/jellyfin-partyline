@@ -1,28 +1,20 @@
 [
     {
-        "name": "Syncplay Chat",
-        "guid": "a69744cc-2281-48bf-adef-8e451a16ff71",
+        "name": "Partyline",
+        "guid": "9512396d-7364-4d1f-aa1a-aa719e8ee3ff",
         "overview": "Text and private WebRTC voice chat for Jellyfin SyncPlay.",
         "description": "Adds SyncPlay text chat plus opt-in WebRTC mesh voice with authenticated signaling, adaptive audio, and optional coturn fallback.",
-        "owner": "AbhayVAshokan",
+        "owner": "Llewellyn500",
         "category": "General",
-        "imageUrl": "https://raw.githubusercontent.com/AbhayVAshokan/jellyfin-syncplay-chat/master/assets/icon.jpg",
+        "imageUrl": "https://raw.githubusercontent.com/Llewellyn500/jellyfin-partyline/main/assets/icon.png",
         "versions": [
             {
-                "changelog": "**Full Changelog**: https://github.com/AbhayVAshokan/jellyfin-syncplay-chat/compare/v1.0.0.0...v1.0.1.1",
-                "targetAbi": "10.11.0.0",
-                "version": "1.0.1.1",
-                "sourceUrl": "https://github.com/AbhayVAshokan/jellyfin-syncplay-chat/releases/download/v1.0.1.1/Jellyfin.Plugin.SyncPlayChat_1.0.1.1.zip",
-                "checksum": "cd7d0559af2a817b673187f8a90787f3",
-                "timestamp": "2026-04-16T16:34:06"
-            },
-            {
-                "changelog": "Initial release",
+                "changelog": "Initial independent Partyline release with persistent SyncPlay text chat, opt-in WebRTC voice, mobile controls, reconnect recovery, and private HTTPS setup guidance.",
                 "targetAbi": "10.11.0.0",
                 "version": "1.0.0.0",
-                "sourceUrl": "https://github.com/abhayvashokan/jellyfin-syncplay-chat/releases/download/1.0.0.0/Jellyfin.Plugin.SyncPlayChat_10.11.0.zip",
-                "checksum": "62369fc8fb2d69793389312648b7d93a",
-                "timestamp": "2026-04-15T00:00:00"
+                "sourceUrl": "https://github.com/Llewellyn500/jellyfin-partyline/releases/download/v1.0.0.0/Jellyfin.Plugin.Partyline_1.0.0.0.zip",
+                "checksum": "3686ede5aeedf4bd5e68017c1e9927ee",
+                "timestamp": "2026-09-28T11:54:56"
             }
         ]
     }

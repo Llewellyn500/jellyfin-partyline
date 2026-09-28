@@ -1,6 +1,6 @@
 ---
-name: "SyncPlay Chat"
-guid: "a69744cc-2281-48bf-adef-8e451a16ff71"
+name: "Partyline"
+guid: "9512396d-7364-4d1f-aa1a-aa719e8ee3ff"
 version: "1.0.0.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
@@ -9,7 +9,7 @@ description: >
   Adds Jellyfin-integrated SyncPlay text chat and opt-in WebRTC mesh voice chat
   with authenticated signaling, adaptive audio, and optional coturn fallback.
 category: "General"
-owner: "jellyfin"
+owner: "Llewellyn500"
 artifacts:
-- "Jellyfin.Plugin.SyncPlayChat.dll"
-changelog: "Add native WebRTC SyncPlay voice chat."
+- "Jellyfin.Plugin.Partyline.dll"
+changelog: "Initial independent Partyline release."

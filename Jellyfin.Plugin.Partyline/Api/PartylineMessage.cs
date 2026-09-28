@@ -1,11 +1,11 @@
 using System;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// A recent SyncPlay chat message.
 /// </summary>
-public sealed class SyncPlayChatMessage
+public sealed class PartylineMessage
 {
     /// <summary>Gets or sets the server-assigned message identifier.</summary>
     public long Id { get; set; }

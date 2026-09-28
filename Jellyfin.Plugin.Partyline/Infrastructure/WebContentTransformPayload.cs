@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.SyncPlayChat.Infrastructure;
+namespace Jellyfin.Plugin.Partyline.Infrastructure;
 
 /// <summary>
 /// Payload shape passed by File Transformation callback.

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SyncPlay Chat</title>
+    <title>Partyline</title>
 </head>
 <body>
-    <div id="SyncPlayChatConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+    <div id="PartylineConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
         <div data-role="content">
             <div class="content-primary">
-                <form id="SyncPlayChatConfigForm">
+                <form id="PartylineConfigForm">
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label><input id="EnableVoiceChat" type="checkbox" is="emby-checkbox" /><span>Enable voice chat</span></label>
                     </div>
@@ -25,8 +25,8 @@
         <script type="text/javascript">
             (function () {
                 'use strict';
-                const pluginId = 'a69744cc-2281-48bf-adef-8e451a16ff71';
-                const page = document.querySelector('#SyncPlayChatConfigPage');
+                const pluginId = '9512396d-7364-4d1f-aa1a-aa719e8ee3ff';
+                const page = document.querySelector('#PartylineConfigPage');
                 page.addEventListener('pageshow', function () {
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
@@ -39,7 +39,7 @@
                         Dashboard.hideLoadingMsg();
                     });
                 });
-                page.querySelector('#SyncPlayChatConfigForm').addEventListener('submit', function (event) {
+                page.querySelector('#PartylineConfigForm').addEventListener('submit', function (event) {
                     event.preventDefault();
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {

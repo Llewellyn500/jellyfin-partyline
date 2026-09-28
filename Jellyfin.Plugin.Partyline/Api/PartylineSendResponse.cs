@@ -1,9 +1,9 @@
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// Result payload for SyncPlay chat send attempts.
 /// </summary>
-public class SyncPlayChatSendResponse
+public class PartylineSendResponse
 {
     /// <summary>
     /// Gets or sets total attempted session sends.

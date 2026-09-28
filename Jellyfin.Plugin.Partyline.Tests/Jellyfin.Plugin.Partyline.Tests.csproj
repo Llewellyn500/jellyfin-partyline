@@ -13,6 +13,6 @@
     <PackageReference Include="Jellyfin.Model" Version="10.11.8" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jellyfin.Plugin.SyncPlayChat\Jellyfin.Plugin.SyncPlayChat.csproj" />
+    <ProjectReference Include="..\Jellyfin.Plugin.Partyline\Jellyfin.Plugin.Partyline.csproj" />
   </ItemGroup>
 </Project>

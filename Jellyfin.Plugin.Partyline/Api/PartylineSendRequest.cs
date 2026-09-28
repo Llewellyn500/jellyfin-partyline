@@ -1,9 +1,9 @@
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// Request payload for sending SyncPlay chat messages.
 /// </summary>
-public class SyncPlayChatSendRequest
+public class PartylineSendRequest
 {
     /// <summary>
     /// Gets or sets the preferred SyncPlay group identifier.

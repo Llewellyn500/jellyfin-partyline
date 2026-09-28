@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Plugin.SyncPlayChat.Voice;
+using Jellyfin.Plugin.Partyline.Voice;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.SyncPlay;
 using MediaBrowser.Controller.SyncPlay.Requests;
@@ -16,13 +16,13 @@ using Microsoft.AspNetCore.Mvc;
 #pragma warning disable SA1611 // Endpoint summaries and OpenAPI signatures describe request parameters.
 #pragma warning disable SA1615 // ASP.NET action result semantics are documented by response metadata.
 
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// Authenticated WebRTC presence and signaling endpoints. Media never passes through these endpoints.
 /// </summary>
 [ApiController]
-[Route("SyncPlayChat/Voice")]
+[Route("Partyline/Voice")]
 [Authorize]
 public sealed class VoiceController : ControllerBase
 {

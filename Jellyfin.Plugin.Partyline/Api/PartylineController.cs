@@ -15,27 +15,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// SyncPlay chat API endpoints.
 /// </summary>
 [ApiController]
-[Route("SyncPlayChat")]
+[Route("Partyline")]
 [Authorize]
-public class SyncPlayChatController : ControllerBase
+public class PartylineController : ControllerBase
 {
     private readonly ISessionManager _sessionManager;
     private readonly ISyncPlayManager _syncPlayManager;
     private readonly ChatHistoryStore _chatHistory;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SyncPlayChatController"/> class.
+    /// Initializes a new instance of the <see cref="PartylineController"/> class.
     /// </summary>
     /// <param name="sessionManager">The Jellyfin session manager.</param>
     /// <param name="syncPlayManager">The Jellyfin SyncPlay manager.</param>
     /// <param name="chatHistory">The recent message store.</param>
-    public SyncPlayChatController(ISessionManager sessionManager, ISyncPlayManager syncPlayManager, ChatHistoryStore chatHistory)
+    public PartylineController(ISessionManager sessionManager, ISyncPlayManager syncPlayManager, ChatHistoryStore chatHistory)
     {
         _sessionManager = sessionManager;
         _syncPlayManager = syncPlayManager;
@@ -51,7 +51,7 @@ public class SyncPlayChatController : ControllerBase
     [HttpGet("History")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IReadOnlyList<SyncPlayChatMessage>> History([FromQuery] string? groupId, [FromQuery] string? senderSessionId)
+    public ActionResult<IReadOnlyList<PartylineMessage>> History([FromQuery] string? groupId, [FromQuery] string? senderSessionId)
     {
         Guid userId = ResolveCurrentUserId();
         if (userId == Guid.Empty)
@@ -79,7 +79,7 @@ public class SyncPlayChatController : ControllerBase
     [HttpPost("Send")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<SyncPlayChatSendResponse>> Send([FromBody, Required] SyncPlayChatSendRequest request)
+    public async Task<ActionResult<PartylineSendResponse>> Send([FromBody, Required] PartylineSendRequest request)
     {
         if (request is null)
         {
@@ -97,7 +97,7 @@ public class SyncPlayChatController : ControllerBase
             return BadRequest("Text cannot exceed 1000 characters.");
         }
 
-        string header = string.IsNullOrWhiteSpace(request.Header) ? "SyncPlay Chat" : request.Header.Trim();
+        string header = string.IsNullOrWhiteSpace(request.Header) ? "Partyline" : request.Header.Trim();
         int timeoutMs = request.TimeoutMs is > 0 ? request.TimeoutMs.Value : 4000;
 
         Guid userId = ResolveCurrentUserId();
@@ -121,7 +121,7 @@ public class SyncPlayChatController : ControllerBase
         var targetGroup = ResolveTargetGroup(visibleGroups, request.GroupId, participantHints);
         if (targetGroup is null)
         {
-            return Ok(new SyncPlayChatSendResponse
+            return Ok(new PartylineSendResponse
             {
                 Attempted = 0,
                 Sent = 0,
@@ -132,7 +132,7 @@ public class SyncPlayChatController : ControllerBase
         var allowedSessionIds = ResolveAllowedSessionIds(request, allSessions, controllingSessionId, targetGroup);
         if (allowedSessionIds.Count == 0)
         {
-            return Ok(new SyncPlayChatSendResponse
+            return Ok(new PartylineSendResponse
             {
                 Attempted = 0,
                 Sent = 0,
@@ -169,7 +169,7 @@ public class SyncPlayChatController : ControllerBase
             }
         }
 
-        return Ok(new SyncPlayChatSendResponse
+        return Ok(new PartylineSendResponse
         {
             Attempted = allowedSessionIds.Count,
             Sent = sent,
@@ -178,7 +178,7 @@ public class SyncPlayChatController : ControllerBase
     }
 
     private static List<string> ResolveAllowedSessionIds(
-        SyncPlayChatSendRequest request,
+        PartylineSendRequest request,
         List<SessionInfo> allSessions,
         string controllingSessionId,
         GroupInfoDto targetGroup)

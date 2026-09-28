@@ -1,14 +1,14 @@
 (function () {
     'use strict';
 
-    const buttonId = 'syncPlayChatButton';
-    const markerClass = 'syncPlayChatButton';
-    const floatingHostId = 'syncPlayChatFloatingHost';
-    const composerId = 'syncPlayChatComposer';
-    const inputId = 'syncPlayChatInput';
-    const sendButtonId = 'syncPlayChatSendButton';
-    const messageListId = 'syncPlayChatMessages';
-    const unreadBadgeId = 'syncPlayChatUnread';
+    const buttonId = 'partylineButton';
+    const markerClass = 'partylineButton';
+    const floatingHostId = 'partylineFloatingHost';
+    const composerId = 'partylineComposer';
+    const inputId = 'partylineInput';
+    const sendButtonId = 'partylineSendButton';
+    const messageListId = 'partylineMessages';
+    const unreadBadgeId = 'partylineUnread';
     const refreshIntervalMs = 5000;
     const fullscreenCollapseMs = 8000;
     let shouldShowButton = false;
@@ -36,11 +36,11 @@
         }
 
         if (details === undefined) {
-            window.console.log('[SyncPlayChat]', message);
+            window.console.log('[Partyline]', message);
             return;
         }
 
-        window.console.log('[SyncPlayChat]', message, details);
+        window.console.log('[Partyline]', message, details);
     }
 
     function getControlHost() {
@@ -112,8 +112,8 @@
         button.id = buttonId;
         button.type = 'button';
         button.className = 'emby-button ' + markerClass;
-        button.setAttribute('aria-label', 'SyncPlay chat');
-        button.title = 'SyncPlay chat';
+        button.setAttribute('aria-label', 'Partyline chat');
+        button.title = 'Partyline chat';
         button.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 4h16v11H8l-4 4V4z"/></svg>' +
             '<span data-chat-label style="display:none;margin-left:.35rem">Chat</span>' +
             '<span id="' + unreadBadgeId + '" aria-label="Unread messages" style="display:none;position:absolute;right:-.35rem;top:-.4rem;min-width:1.15rem;height:1.15rem;padding:0 .2rem;border-radius:1rem;background:#e53935;color:#fff;font-size:.72rem;line-height:1.15rem;text-align:center"></span>';
@@ -163,7 +163,7 @@
         header.style.padding = '.7rem .8rem';
         header.style.fontWeight = '600';
         header.style.borderBottom = '1px solid rgba(255,255,255,.12)';
-        header.appendChild(document.createTextNode('SyncPlay chat'));
+        header.appendChild(document.createTextNode('Partyline chat'));
 
         const closeButton = document.createElement('button');
         closeButton.type = 'button';
@@ -199,7 +199,7 @@
         input.rows = 1;
         input.maxLength = 1000;
         input.placeholder = 'Type a message';
-        input.setAttribute('aria-label', 'SyncPlay chat message');
+        input.setAttribute('aria-label', 'Partyline chat message');
         input.wrap = 'soft';
         input.style.flex = '1 1 auto';
         input.style.width = '100%';
@@ -376,7 +376,7 @@
 
         historyInProgress = true;
         try {
-            const response = await fetchJson('SyncPlayChat/History?groupId=' + encodeURIComponent(currentGroupId) +
+            const response = await fetchJson('Partyline/History?groupId=' + encodeURIComponent(currentGroupId) +
                 '&senderSessionId=' + encodeURIComponent(currentSessionId));
             let history = response;
             if (typeof history === 'string') {
@@ -1277,19 +1277,19 @@
 
     function showLocalToast(text, title) {
         if (window.toastr && typeof window.toastr.info === 'function') {
-            window.toastr.info(text, title || 'SyncPlay Chat');
+            window.toastr.info(text, title || 'Partyline');
             return;
         }
 
         if (window.Dashboard && typeof window.Dashboard.alert === 'function') {
             window.Dashboard.alert({
-                title: title || 'SyncPlay Chat',
+                title: title || 'Partyline',
                 message: text
             });
             return;
         }
 
-        logDebug('Toast fallback', { title: title || 'SyncPlay Chat', text: text });
+        logDebug('Toast fallback', { title: title || 'Partyline', text: text });
     }
 
     function extractParticipantsFromGroups(groups) {
@@ -1326,10 +1326,10 @@
     }
 
     async function sendMessageViaServer(text, senderSessionId, groupId, participants) {
-        const response = await postJson('SyncPlayChat/Send', {
+        const response = await postJson('Partyline/Send', {
             GroupId: groupId || '',
             SenderSessionId: senderSessionId || '',
-            Header: 'SyncPlay Chat',
+            Header: 'Partyline',
             Text: text,
             TimeoutMs: 4000,
             ParticipantsCsv: (participants || []).join(',')
@@ -1422,7 +1422,7 @@
                 showLocalToast('No active SyncPlay recipients were found.');
             }
         } catch (err) {
-            logDebug('Failed to send SyncPlay chat message', err);
+            logDebug('Failed to send Partyline chat message', err);
             showLocalToast('Failed to send: ' + summarizeError(err));
         } finally {
             sendInProgress = false;
@@ -1542,7 +1542,7 @@
         } finally {
             refreshInProgress = false;
             addButton();
-            window.dispatchEvent(new CustomEvent('syncplaychatcontext', {
+            window.dispatchEvent(new CustomEvent('partylinecontext', {
                 detail: { inGroup: shouldShowButton, sessionId: currentSessionId, groupId: currentGroupId }
             }));
             if (shouldShowButton) {
@@ -1596,8 +1596,8 @@
             return;
         }
 
-        window.__syncPlayChatLoaded = true;
-        window.SyncPlayChatBridge = {
+        window.__partylineLoaded = true;
+        window.PartylineBridge = {
             getContext: function () {
                 return { inGroup: shouldShowButton, sessionId: currentSessionId, groupId: currentGroupId };
             },

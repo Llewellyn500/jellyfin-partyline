@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Jellyfin.Plugin.SyncPlayChat.Configuration;
+using Jellyfin.Plugin.Partyline.Configuration;
 
 #pragma warning disable SA1611 // The method signature is self-describing and documented as a unit.
 #pragma warning disable SA1615 // The method summary documents the returned ICE configuration.
 
-namespace Jellyfin.Plugin.SyncPlayChat.Voice;
+namespace Jellyfin.Plugin.Partyline.Voice;
 
 /// <summary>
 /// Builds browser ICE configuration and coturn REST API credentials.

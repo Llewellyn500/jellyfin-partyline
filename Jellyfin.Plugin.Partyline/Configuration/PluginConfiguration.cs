@@ -1,9 +1,9 @@
 using MediaBrowser.Model.Plugins;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Configuration;
+namespace Jellyfin.Plugin.Partyline.Configuration;
 
 /// <summary>
-/// SyncPlay Chat plugin configuration.
+/// Partyline plugin configuration.
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {

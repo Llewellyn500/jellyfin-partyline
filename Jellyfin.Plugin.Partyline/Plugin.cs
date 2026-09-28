@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Jellyfin.Plugin.SyncPlayChat.Configuration;
+using Jellyfin.Plugin.Partyline.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
-namespace Jellyfin.Plugin.SyncPlayChat;
+namespace Jellyfin.Plugin.Partyline;
 
 /// <summary>
 /// The main plugin.
@@ -25,10 +25,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     }
 
     /// <inheritdoc />
-    public override string Name => "SyncPlay Chat";
+    public override string Name => "Partyline";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("a69744cc-2281-48bf-adef-8e451a16ff71");
+    public override Guid Id => Guid.Parse("9512396d-7364-4d1f-aa1a-aa719e8ee3ff");
 
     /// <summary>
     /// Gets the current plugin instance.
@@ -40,7 +40,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         yield return new PluginPageInfo
         {
-            Name = "SyncPlayChat",
+            Name = "Partyline",
             EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
         };
     }

@@ -2,51 +2,51 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Infrastructure;
+namespace Jellyfin.Plugin.Partyline.Infrastructure;
 
 /// <summary>
-/// Applies web content transformations for SyncPlay Chat.
+/// Applies web content transformations for Partyline.
 /// </summary>
-public static class SyncChatWebTransformer
+public static class PartylineWebTransformer
 {
-    private const string SyncChatScriptMarker = "<!-- SyncPlayChat sync-chat.js -->";
+    private const string PartylineScriptMarker = "<!-- Partyline partyline.js -->";
 
     /// <summary>
-    /// Injects SyncPlay Chat script into jellyfin-web index page.
+    /// Injects Partyline script into jellyfin-web index page.
     /// </summary>
     /// <param name="payload">The transformation payload.</param>
     /// <returns>The transformed index.html content.</returns>
     public static string TransformIndexHtml(WebContentTransformPayload payload)
     {
-        if (payload.Contents.Contains(SyncChatScriptMarker, StringComparison.Ordinal))
+        if (payload.Contents.Contains(PartylineScriptMarker, StringComparison.Ordinal))
         {
             return payload.Contents;
         }
 
-        string scriptContent = GetEmbeddedScript("sync-chat.js") + GetEmbeddedScript("voice-chat.js");
+        string scriptContent = GetEmbeddedScript("partyline.js") + GetEmbeddedScript("voice-chat.js");
         if (string.IsNullOrEmpty(scriptContent))
         {
             return payload.Contents;
         }
 
-        string injectedScript = string.Format(CultureInfo.InvariantCulture, "{0}<script>{1}</script>", SyncChatScriptMarker, scriptContent);
+        string injectedScript = string.Format(CultureInfo.InvariantCulture, "{0}<script>{1}</script>", PartylineScriptMarker, scriptContent);
 
         return payload.Contents.Replace("</body>", string.Format(CultureInfo.InvariantCulture, "{0}</body>", injectedScript), StringComparison.Ordinal);
     }
 
     /// <summary>
-    /// Returns embedded sync-chat.js content for plugin web path.
+    /// Returns embedded partyline.js content for plugin web path.
     /// </summary>
     /// <returns>Script content.</returns>
-    public static string GetSyncChatScript()
+    public static string GetPartylineScript()
     {
-        return GetEmbeddedScript("sync-chat.js");
+        return GetEmbeddedScript("partyline.js");
     }
 
     private static string GetEmbeddedScript(string fileName)
     {
-        string resourcePath = "Jellyfin.Plugin.SyncPlayChat.Web." + fileName;
-        using Stream? stream = typeof(SyncChatWebTransformer).Assembly.GetManifestResourceStream(resourcePath);
+        string resourcePath = "Jellyfin.Plugin.Partyline.Web." + fileName;
+        using Stream? stream = typeof(PartylineWebTransformer).Assembly.GetManifestResourceStream(resourcePath);
         if (stream is null)
         {
             return string.Empty;

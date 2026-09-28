@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Api;
+namespace Jellyfin.Plugin.Partyline.Api;
 
 /// <summary>
 /// Keeps a small, process-local history for each SyncPlay group.
@@ -12,7 +12,7 @@ namespace Jellyfin.Plugin.SyncPlayChat.Api;
 public sealed class ChatHistoryStore
 {
     private const int MaximumMessagesPerGroup = 100;
-    private readonly ConcurrentDictionary<Guid, List<SyncPlayChatMessage>> _messages = new();
+    private readonly ConcurrentDictionary<Guid, List<PartylineMessage>> _messages = new();
     private long _nextId;
 
     /// <summary>
@@ -23,9 +23,9 @@ public sealed class ChatHistoryStore
     /// <param name="senderName">The sender display name.</param>
     /// <param name="text">The message body.</param>
     /// <returns>The stored message.</returns>
-    public SyncPlayChatMessage Add(Guid groupId, Guid userId, string senderName, string text)
+    public PartylineMessage Add(Guid groupId, Guid userId, string senderName, string text)
     {
-        var message = new SyncPlayChatMessage
+        var message = new PartylineMessage
         {
             Id = Interlocked.Increment(ref _nextId),
             SenderUserId = userId,
@@ -52,7 +52,7 @@ public sealed class ChatHistoryStore
     /// </summary>
     /// <param name="groupId">The SyncPlay group identifier.</param>
     /// <returns>The recent messages.</returns>
-    public IReadOnlyList<SyncPlayChatMessage> Get(Guid groupId)
+    public IReadOnlyList<PartylineMessage> Get(Guid groupId)
     {
         if (!_messages.TryGetValue(groupId, out var messages))
         {

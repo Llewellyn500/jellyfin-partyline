@@ -1,17 +1,17 @@
 using System;
-using Jellyfin.Plugin.SyncPlayChat.Api;
-using Jellyfin.Plugin.SyncPlayChat.Voice;
+using Jellyfin.Plugin.Partyline.Api;
+using Jellyfin.Plugin.Partyline.Voice;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Infrastructure;
+namespace Jellyfin.Plugin.Partyline.Infrastructure;
 
 /// <summary>
-/// Registers SyncPlay Chat web transformations.
+/// Registers Partyline web transformations.
 /// </summary>
-public class SyncChatWebInjectionRegistrator : IPluginServiceRegistrator
+public class PartylineWebInjectionRegistrator : IPluginServiceRegistrator
 {
     /// <inheritdoc />
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
@@ -19,6 +19,6 @@ public class SyncChatWebInjectionRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<ChatHistoryStore>();
         serviceCollection.AddSingleton<VoiceRoomManager>();
         serviceCollection.AddSingleton<TurnCredentialService>();
-        serviceCollection.AddHostedService<SyncChatWebInjectionStartupService>();
+        serviceCollection.AddHostedService<PartylineWebInjectionStartupService>();
     }
 }

@@ -7,7 +7,7 @@ const vm = require('node:vm');
 
 const window = { __SYNCPLAYVOICE_TEST__: true, console, setTimeout, clearTimeout, setInterval, clearInterval };
 const context = vm.createContext({ window, console, navigator: { onLine: true }, setTimeout, clearTimeout, setInterval, clearInterval, AbortController });
-const source = fs.readFileSync(path.join(__dirname, '..', 'Jellyfin.Plugin.SyncPlayChat', 'Web', 'voice-chat.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '..', 'Jellyfin.Plugin.Partyline', 'Web', 'voice-chat.js'), 'utf8');
 vm.runInContext(source, context, { filename: 'voice-chat.js' });
 
 const decide = window.__SyncPlayVoiceTest.qualityDecision;

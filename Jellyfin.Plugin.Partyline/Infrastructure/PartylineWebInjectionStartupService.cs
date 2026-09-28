@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.SyncPlayChat.Infrastructure;
+namespace Jellyfin.Plugin.Partyline.Infrastructure;
 
 /// <summary>
-/// Registers SyncPlay Chat transformation after plugin startup.
+/// Registers Partyline transformation after plugin startup.
 /// </summary>
-public class SyncChatWebInjectionStartupService : IHostedService
+public class PartylineWebInjectionStartupService : IHostedService
 {
-    private static readonly Guid TransformationId = Guid.Parse("5e2846e6-173f-45ff-9d16-f2f83cf64719");
-    private readonly ILogger<SyncChatWebInjectionStartupService> _logger;
+    private static readonly Guid TransformationId = Guid.Parse("bab2fa5a-1bdc-4e73-b915-9ca549373b86");
+    private readonly ILogger<PartylineWebInjectionStartupService> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SyncChatWebInjectionStartupService"/> class.
+    /// Initializes a new instance of the <see cref="PartylineWebInjectionStartupService"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
-    public SyncChatWebInjectionStartupService(ILogger<SyncChatWebInjectionStartupService> logger)
+    public PartylineWebInjectionStartupService(ILogger<PartylineWebInjectionStartupService> logger)
     {
         _logger = logger;
     }
@@ -49,7 +49,7 @@ public class SyncChatWebInjectionStartupService : IHostedService
 
             if (fileTransformationAssembly is null)
             {
-                _logger.LogWarning("File Transformation assembly not found; sync-chat.js will not be injected.");
+                _logger.LogWarning("File Transformation assembly not found; partyline.js will not be injected.");
                 return;
             }
 
@@ -65,8 +65,8 @@ public class SyncChatWebInjectionStartupService : IHostedService
             string payloadJson = "{" +
                 $"\"id\":\"{TransformationId}\"," +
                 "\"fileNamePattern\":\"index.html\"," +
-                $"\"callbackAssembly\":\"{typeof(SyncChatWebTransformer).Assembly.FullName}\"," +
-                $"\"callbackClass\":\"{typeof(SyncChatWebTransformer).FullName}\"," +
+                $"\"callbackAssembly\":\"{typeof(PartylineWebTransformer).Assembly.FullName}\"," +
+                $"\"callbackClass\":\"{typeof(PartylineWebTransformer).FullName}\"," +
                 "\"callbackMethod\":\"TransformIndexHtml\"" +
                 "}";
 
@@ -95,11 +95,11 @@ public class SyncChatWebInjectionStartupService : IHostedService
             }
 
             registerTransformationMethod.Invoke(null, [payload]);
-            _logger.LogInformation("Registered File Transformation for sync-chat.js injection.");
+            _logger.LogInformation("Registered File Transformation for partyline.js injection.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to register sync-chat.js transformation.");
+            _logger.LogError(ex, "Failed to register partyline.js transformation.");
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 #pragma warning disable SA1402 // Related wire DTOs are intentionally kept together.
 #pragma warning disable SA1649 // This file contains the small voice wire model set.
 
-namespace Jellyfin.Plugin.SyncPlayChat.Voice;
+namespace Jellyfin.Plugin.Partyline.Voice;
 
 /// <summary>
 /// A participant in a SyncPlay voice room.
