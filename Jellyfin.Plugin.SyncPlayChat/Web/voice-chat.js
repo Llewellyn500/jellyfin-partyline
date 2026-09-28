@@ -28,6 +28,10 @@
         return window.location.protocol === 'https:' && window.isSecureContext === true;
     }
 
+    function isFullscreenMode() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
     function qualityDecision(profile, badSamples, goodSamples, loss, jitter, rtt) {
         const poor = loss > 0.08 || jitter > 80 || rtt > 800;
         const degraded = poor || loss >= 0.03 || jitter >= 30 || rtt >= 250;
@@ -493,6 +497,8 @@
             window.addEventListener('offline', () => this.setStatus('Reconnecting…'));
             window.addEventListener('online', () => this.recoverSignaling());
             window.addEventListener('beforeunload', () => this.cleanup(false));
+            document.addEventListener('fullscreenchange', () => this.updateFullscreenUi(true));
+            document.addEventListener('webkitfullscreenchange', () => this.updateFullscreenUi(true));
             const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
             if (context) {
                 this.onContext(context);
@@ -517,6 +523,10 @@
             button.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                if (this.state !== 'DISCONNECTED') {
+                    this.panel.style.display = this.panel.style.display === 'none' ? 'block' : 'none';
+                    return;
+                }
                 this.join();
             });
 
@@ -546,6 +556,25 @@
             this.panel = panel;
         }
 
+        updateFullscreenUi(collapsePanel) {
+            if (this.state === 'DISCONNECTED') {
+                return;
+            }
+            const fullscreen = isFullscreenMode();
+            this.button.textContent = '🎙 Voice';
+            this.button.setAttribute('aria-label', 'Toggle SyncPlay voice controls');
+            this.button.style.display = fullscreen ? 'inline-flex' : 'none';
+            this.button.style.padding = fullscreen ? '0.38rem 0.65rem' : '0.48rem 0.92rem';
+            this.button.style.borderRadius = fullscreen ? '999px' : '0.6rem';
+            if (fullscreen) {
+                if (collapsePanel) {
+                    this.panel.style.display = 'none';
+                }
+            } else {
+                this.panel.style.display = 'block';
+            }
+        }
+
         onContext(context) {
             const previousSession = this.sessionId;
             this.sessionId = context && context.sessionId || '';
@@ -554,7 +583,13 @@
                 this.panel.style.display = 'none';
                 return;
             }
-            this.button.style.display = context && context.inGroup && this.state === 'DISCONNECTED' ? 'inline-flex' : 'none';
+            if (this.state === 'DISCONNECTED') {
+                this.button.textContent = '🎙 Join Voice';
+                this.button.setAttribute('aria-label', 'Join SyncPlay voice chat');
+                this.button.style.display = context && context.inGroup ? 'inline-flex' : 'none';
+            } else {
+                this.updateFullscreenUi(false);
+            }
             if (this.state !== 'DISCONNECTED' && (!context.inGroup
                 || (previousSession && previousSession !== this.sessionId)
                 || (this.joinedGroupId && context.groupId && this.joinedGroupId !== normalizeId(context.groupId)))) {
@@ -600,12 +635,11 @@
                 this.peers = new PeerManager(this, this.participant.participantId, this.stream, iceServers, joined.participants);
                 this.peers.reconcile(joined.participants, true);
                 this.state = 'CONNECTED';
-                this.button.style.display = 'none';
-                this.panel.style.display = 'block';
                 this.panel.querySelector('[data-voice-mute]').style.display = 'block';
                 this.panel.querySelector('[data-voice-leave]').textContent = '🚪 Leave voice';
                 this.setStatus('Connected');
                 this.renderParticipants();
+                this.updateFullscreenUi(true);
                 this.heartbeatTimer = window.setInterval(() => this.heartbeat(), heartbeatMs);
                 this.pollEvents();
             } catch (error) {
@@ -753,6 +787,10 @@
             this.cursor = 0;
             this.state = 'DISCONNECTED';
             this.panel.style.display = 'none';
+            this.button.textContent = '🎙 Join Voice';
+            this.button.setAttribute('aria-label', 'Join SyncPlay voice chat');
+            this.button.style.padding = '0.48rem 0.92rem';
+            this.button.style.borderRadius = '0.6rem';
             const context = window.SyncPlayChatBridge && window.SyncPlayChatBridge.getContext();
             this.button.style.display = isSecureVoicePage() && context && context.inGroup ? 'inline-flex' : 'none';
             if (notifyServer && sessionId) {

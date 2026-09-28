@@ -49,9 +49,25 @@
             || document.querySelector('[class*="videoOsd"] [class*="controls"]');
     }
 
+    function getFullscreenElement() {
+        return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+
+    function isFullscreenMode() {
+        return !!getFullscreenElement();
+    }
+
+    function placeFloatingHost(host) {
+        const parent = getFullscreenElement() || document.body;
+        if (host.parentNode !== parent) {
+            parent.appendChild(host);
+        }
+    }
+
     function getFloatingHost() {
         let host = document.getElementById(floatingHostId);
         if (host) {
+            placeFloatingHost(host);
             return host;
         }
 
@@ -64,8 +80,19 @@
         host.style.display = 'flex';
         host.style.alignItems = 'flex-end';
         host.style.gap = '0.5rem';
-        document.body.appendChild(host);
+        placeFloatingHost(host);
         return host;
+    }
+
+    function styleChatButton(button) {
+        const fullscreen = isFullscreenMode();
+        const label = button.querySelector('[data-chat-label]');
+        button.style.padding = fullscreen ? '0.38rem 0.65rem' : '0.48rem 0.92rem';
+        button.style.borderRadius = fullscreen ? '999px' : '0.6rem';
+        button.style.background = fullscreen ? 'rgba(0,0,0,.62)' : 'rgba(0, 0, 0, 0.7)';
+        if (label) {
+            label.style.display = fullscreen ? 'inline' : 'none';
+        }
     }
 
     function createButton() {
@@ -76,6 +103,7 @@
         button.setAttribute('aria-label', 'SyncPlay chat');
         button.title = 'SyncPlay chat';
         button.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 4h16v11H8l-4 4V4z"/></svg>' +
+            '<span data-chat-label style="display:none;margin-left:.35rem">Chat</span>' +
             '<span id="' + unreadBadgeId + '" aria-label="Unread messages" style="display:none;position:absolute;right:-.35rem;top:-.4rem;min-width:1.15rem;height:1.15rem;padding:0 .2rem;border-radius:1rem;background:#e53935;color:#fff;font-size:.72rem;line-height:1.15rem;text-align:center"></span>';
         button.style.display = 'inline-flex';
         button.style.alignItems = 'center';
@@ -93,6 +121,7 @@
         button.addEventListener('click', function () {
             toggleComposer(button);
         });
+        styleChatButton(button);
         return button;
     }
 
@@ -1523,7 +1552,9 @@
 
         getOrCreateComposer(floatingHost);
 
-        if (floatingHost.querySelector('.' + markerClass)) {
+        const existingButton = floatingHost.querySelector('.' + markerClass);
+        if (existingButton) {
+            styleChatButton(existingButton);
             return;
         }
 
@@ -1545,6 +1576,15 @@
 
         const observer = new MutationObserver(addButton);
         observer.observe(document.body, { childList: true, subtree: true });
+
+        const onFullscreenChange = function () {
+            if (isFullscreenMode()) {
+                hideComposer();
+            }
+            addButton();
+        };
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
         refreshSyncPlayState();
         window.setInterval(refreshSyncPlayState, refreshIntervalMs);
