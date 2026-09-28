@@ -1,5 +1,9 @@
 name: '🔬 Run CodeQL'
 
+permissions:
+  contents: read
+  security-events: write
+
 on:
   push:
     branches: [ main ]
@@ -18,3 +22,4 @@ jobs:
     uses: jellyfin/jellyfin-meta-plugins/.github/workflows/scan-codeql.yaml@master
     with:
       repository-name: Llewellyn500/jellyfin-partyline
+      dotnet-version: '9.0.x'
