@@ -5,6 +5,7 @@
     const buttonId = 'syncPlayVoiceButton';
     const panelId = 'syncPlayVoicePanel';
     const heartbeatMs = 10000;
+    const fullscreenCollapseMs = 8000;
     const signalBackoff = [500, 1000, 2000, 4000, 8000, 10000];
     const peerBackoff = [1000, 3000, 7000, 15000, 30000];
 
@@ -491,6 +492,7 @@
             this.heartbeatTimer = 0;
             this.pollController = null;
             this.signalRetry = 0;
+            this.collapseTimer = 0;
             this.stopped = false;
             this.createUi();
             window.addEventListener('syncplaychatcontext', (event) => this.onContext(event.detail));
@@ -524,7 +526,13 @@
                 event.preventDefault();
                 event.stopPropagation();
                 if (this.state !== 'DISCONNECTED') {
-                    this.panel.style.display = this.panel.style.display === 'none' ? 'block' : 'none';
+                    const opening = this.panel.style.display === 'none';
+                    this.panel.style.display = opening ? 'block' : 'none';
+                    if (opening) {
+                        this.scheduleFullscreenCollapse();
+                    } else {
+                        window.clearTimeout(this.collapseTimer);
+                    }
                     return;
                 }
                 this.join();
@@ -550,10 +558,25 @@
                 event.stopPropagation();
                 this.leave();
             });
+            ['pointerdown', 'keydown', 'wheel'].forEach((eventName) => {
+                panel.addEventListener(eventName, () => this.scheduleFullscreenCollapse());
+            });
             host.appendChild(panel);
             host.appendChild(button);
             this.button = button;
             this.panel = panel;
+        }
+
+        scheduleFullscreenCollapse() {
+            window.clearTimeout(this.collapseTimer);
+            this.collapseTimer = 0;
+            if (!isFullscreenMode() || this.panel.style.display === 'none') {
+                return;
+            }
+            this.collapseTimer = window.setTimeout(() => {
+                this.collapseTimer = 0;
+                this.panel.style.display = 'none';
+            }, fullscreenCollapseMs);
         }
 
         updateFullscreenUi(collapsePanel) {
@@ -568,9 +591,15 @@
             this.button.style.borderRadius = fullscreen ? '999px' : '0.6rem';
             if (fullscreen) {
                 if (collapsePanel) {
+                    window.clearTimeout(this.collapseTimer);
+                    this.collapseTimer = 0;
                     this.panel.style.display = 'none';
+                } else if (this.panel.style.display !== 'none' && !this.collapseTimer) {
+                    this.scheduleFullscreenCollapse();
                 }
             } else {
+                window.clearTimeout(this.collapseTimer);
+                this.collapseTimer = 0;
                 this.panel.style.display = 'block';
             }
         }
@@ -770,6 +799,8 @@
             }
             const sessionId = this.sessionId;
             this.stopped = true;
+            window.clearTimeout(this.collapseTimer);
+            this.collapseTimer = 0;
             window.clearInterval(this.heartbeatTimer);
             if (this.pollController) {
                 this.pollController.abort();
@@ -833,6 +864,7 @@
             this.panel.querySelector('[data-voice-mute]').style.display = 'none';
             this.panel.querySelector('[data-voice-leave]').textContent = 'Close';
             this.panel.style.display = 'block';
+            this.scheduleFullscreenCollapse();
             window.setTimeout(function () { target.style.display = 'none'; }, 8000);
         }
     }

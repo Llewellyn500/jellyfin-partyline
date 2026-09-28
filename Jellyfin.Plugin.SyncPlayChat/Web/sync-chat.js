@@ -10,6 +10,7 @@
     const messageListId = 'syncPlayChatMessages';
     const unreadBadgeId = 'syncPlayChatUnread';
     const refreshIntervalMs = 5000;
+    const fullscreenCollapseMs = 8000;
     let shouldShowButton = false;
     let currentSessionId = '';
     let currentGroupId = '';
@@ -19,6 +20,7 @@
     let historyGroupId = '';
     let lastMessageId = 0;
     let unreadCount = 0;
+    let composerCollapseTimer = 0;
 
     function normalizeId(value) {
         if (value === null || value === undefined) {
@@ -252,6 +254,9 @@
         composer.appendChild(header);
         composer.appendChild(messages);
         composer.appendChild(footer);
+        ['pointerdown', 'keydown', 'input', 'wheel'].forEach(function (eventName) {
+            composer.addEventListener(eventName, scheduleComposerCollapse);
+        });
         return composer;
     }
 
@@ -426,10 +431,21 @@
     }
 
     function hideComposer() {
+        window.clearTimeout(composerCollapseTimer);
+        composerCollapseTimer = 0;
         const composer = document.getElementById(composerId);
         if (composer) {
             composer.style.display = 'none';
         }
+    }
+
+    function scheduleComposerCollapse() {
+        window.clearTimeout(composerCollapseTimer);
+        composerCollapseTimer = 0;
+        if (!isFullscreenMode() || !isComposerOpen()) {
+            return;
+        }
+        composerCollapseTimer = window.setTimeout(hideComposer, fullscreenCollapseMs);
     }
 
     function toggleComposer(button) {
@@ -458,6 +474,10 @@
                     input.focus();
                 }, 0);
             }
+            scheduleComposerCollapse();
+        } else {
+            window.clearTimeout(composerCollapseTimer);
+            composerCollapseTimer = 0;
         }
     }
 
