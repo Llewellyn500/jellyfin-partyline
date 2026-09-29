@@ -2,8 +2,6 @@
 
 You should have received this guide together with a file named `root.crt`. Install that file once on the device you will use to watch Jellyfin.
 
-![Certificate installation menu paths for each platform](docs/images/crt-install/platform-paths.svg)
-
 > **Only continue if the owner sent you the certificate.** Installing a root certificate changes which secure websites your device trusts. Do not install a similarly named file from anyone else.
 
 ## Check that you have the correct file
