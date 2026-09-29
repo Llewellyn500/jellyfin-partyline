@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Certificate installation paths for Windows, macOS, Android, and iPhone or iPad</title>
+  <desc id="desc">Four cards show the menu path for installing and trusting the Partyline Caddy root certificate.</desc>
+  <rect width="1200" height="760" rx="32" fill="#10131a"/>
+  <text x="60" y="72" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Install the Partyline Caddy root certificate</text>
+  <text x="60" y="110" fill="#aeb7c7" font-family="Segoe UI, Arial, sans-serif" font-size="20">Look for these labels on your device. Menu wording can vary slightly by OS version.</text>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="50" y="150" width="535" height="245" rx="22" fill="#1b2230" stroke="#667eea" stroke-width="3"/>
+    <circle cx="98" cy="200" r="25" fill="#667eea"/>
+    <text x="89" y="210" fill="#fff" font-size="28" font-weight="700">W</text>
+    <text x="140" y="210" fill="#fff" font-size="28" font-weight="700">Windows 10 / 11</text>
+    <text x="80" y="258" fill="#dbe2ef" font-size="21">Install Certificate</text>
+    <text x="80" y="294" fill="#8f9bad" font-size="20">↓</text>
+    <text x="80" y="330" fill="#dbe2ef" font-size="21">Local Machine</text>
+    <text x="80" y="366" fill="#8f9bad" font-size="20">↓  Trusted Root Certification Authorities</text>
+
+    <rect x="615" y="150" width="535" height="245" rx="22" fill="#1b2230" stroke="#f3a952" stroke-width="3"/>
+    <circle cx="663" cy="200" r="25" fill="#f3a952"/>
+    <text x="653" y="210" fill="#10131a" font-size="27" font-weight="700">M</text>
+    <text x="705" y="210" fill="#fff" font-size="28" font-weight="700">macOS</text>
+    <text x="645" y="258" fill="#dbe2ef" font-size="21">Keychain Access</text>
+    <text x="645" y="294" fill="#8f9bad" font-size="20">↓  System → Certificates</text>
+    <text x="645" y="330" fill="#dbe2ef" font-size="21">Caddy Local Authority</text>
+    <text x="645" y="366" fill="#8f9bad" font-size="20">↓  Trust → Always Trust</text>
+
+    <rect x="50" y="425" width="535" height="245" rx="22" fill="#1b2230" stroke="#55c59f" stroke-width="3"/>
+    <circle cx="98" cy="475" r="25" fill="#55c59f"/>
+    <text x="89" y="485" fill="#10131a" font-size="27" font-weight="700">A</text>
+    <text x="140" y="485" fill="#fff" font-size="28" font-weight="700">Android</text>
+    <text x="80" y="533" fill="#dbe2ef" font-size="21">Settings search: “Install a certificate”</text>
+    <text x="80" y="569" fill="#8f9bad" font-size="20">↓  CA certificate</text>
+    <text x="80" y="605" fill="#dbe2ef" font-size="21">Choose root.crt from Downloads</text>
+    <text x="80" y="641" fill="#8f9bad" font-size="20">Name: Partyline Caddy</text>
+
+    <rect x="615" y="425" width="535" height="245" rx="22" fill="#1b2230" stroke="#e878a5" stroke-width="3"/>
+    <circle cx="663" cy="475" r="25" fill="#e878a5"/>
+    <text x="656" y="485" fill="#10131a" font-size="27" font-weight="700">i</text>
+    <text x="705" y="485" fill="#fff" font-size="28" font-weight="700">iPhone / iPad</text>
+    <text x="645" y="533" fill="#dbe2ef" font-size="21">Settings → Profile Downloaded → Install</text>
+    <text x="645" y="569" fill="#8f9bad" font-size="20">then</text>
+    <text x="645" y="605" fill="#dbe2ef" font-size="20">General → About</text>
+    <text x="645" y="638" fill="#dbe2ef" font-size="20">→ Certificate Trust Settings → Full Trust</text>
+  </g>
+
+  <text x="60" y="718" fill="#f7cf66" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Only install root.crt received directly from the Jellyfin server owner.</text>
+</svg>
