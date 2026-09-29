@@ -10,17 +10,6 @@ You should have received this guide together with a file named `root.crt`. Insta
 
 - File name: `root.crt`
 - Certificate name after opening it: **Caddy Local Authority - 2026 ECC Root**
-- SHA-256 checksum of the `root.crt` file:
-
-```text
-933A975D396B92E713382D3467E9ADCA630D8EE73DCBB0A594238008D56AABA0
-```
-
-- SHA-256 fingerprint shown by certificate tools:
-
-```text
-7078D3982944DA33A06645F308FD53755FF5992257E5CEE4F5DC325A77C1AFB8
-```
 
 Choose your device below and follow every step.
 
