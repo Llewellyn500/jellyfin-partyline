@@ -4,7 +4,7 @@ You should have received this guide together with a file named `root.crt`. Insta
 
 ![Certificate installation menu paths for each platform](docs/images/crt-install/platform-paths.svg)
 
-> **Only continue if Llewellyn sent you the certificate.** Installing a root certificate changes which secure websites your device trusts. Do not install a similarly named file from anyone else.
+> **Only continue if the owner sent you the certificate.** Installing a root certificate changes which secure websites your device trusts. Do not install a similarly named file from anyone else.
 
 ## Check that you have the correct file
 
@@ -131,7 +131,7 @@ Connect to the appropriate network, then use one of these exact addresses:
 
 - While connected to the apartment Wi-Fi: <https://192.168.1.53>
 - While connected through Tailscale: <https://100.81.99.21>
-- Tailscale hostname: <https://llewellyn-omen-15.tail80ca43.ts.net>
+- Tailscale hostname: <https://tailscale-name.ts.net>
 
 The address must begin with `https://`. Do not add `:8096`.
 
@@ -143,7 +143,7 @@ The installation worked if Jellyfin opens without a full-page certificate warnin
 2. Check that you used one of the exact addresses above without `:8096`.
 3. Restart the entire browser, not only the tab.
 4. Confirm that the certificate was installed as a **trusted root** or **CA certificate**.
-5. Send Llewellyn a screenshot of the warning, including its error code if one is shown.
+5. Send the owner a screenshot of the warning, including its error code if one is shown.
 
 Do not use the browser’s option to bypass the warning. The certificate must be trusted properly for microphone access to work reliably.
 
