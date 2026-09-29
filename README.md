@@ -2,7 +2,7 @@
 
 `Partyline` adds text chat and opt-in voice chat to Jellyfin SyncPlay. Text messages appear as Jellyfin toasts and in a mobile-friendly panel containing the room's latest 100 messages. Voice is direct browser-to-browser WebRTC audio with Jellyfin used only for authenticated signaling.
 
-<p align="center"><img src="assets/icon.png" alt="Partyline icon" width="220"></p>
+<p align="center"><img src="assets/partyline-banner.png" alt="Jellyfin Partyline banner" width="840"></p>
 
 Partyline is a fork of [Syncplay Chat](https://github.com/AbhayVAshokan/jellyfin-syncplay-chat) by Abhay V Ashokan. It keeps the original SyncPlay text chat and adds opt-in WebRTC voice chat, persistent history, mobile controls, and connection recovery. This fork is independently maintained by [Llewellyn500](https://github.com/Llewellyn500), retains the original GPL license and Git history, and uses its own plugin identity and release feed.
 
