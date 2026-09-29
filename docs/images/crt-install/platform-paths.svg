@@ -28,10 +28,11 @@
     <circle cx="98" cy="475" r="25" fill="#55c59f"/>
     <text x="89" y="485" fill="#10131a" font-size="27" font-weight="700">A</text>
     <text x="140" y="485" fill="#fff" font-size="28" font-weight="700">Android</text>
-    <text x="80" y="533" fill="#dbe2ef" font-size="21">Settings search: “Install a certificate”</text>
-    <text x="80" y="569" fill="#8f9bad" font-size="20">↓  CA certificate</text>
-    <text x="80" y="605" fill="#dbe2ef" font-size="21">Choose root.crt from Downloads</text>
-    <text x="80" y="641" fill="#8f9bad" font-size="20">Name: Partyline Caddy</text>
+    <text x="80" y="527" fill="#dbe2ef" font-size="19">Pixel: Security &amp; privacy → More security settings</text>
+    <text x="80" y="560" fill="#8f9bad" font-size="18">→ Encryption &amp; credentials → Install a certificate</text>
+    <text x="80" y="593" fill="#dbe2ef" font-size="19">Samsung: Security and privacy</text>
+    <text x="80" y="626" fill="#8f9bad" font-size="18">→ More security settings → Install from device storage</text>
+    <text x="80" y="657" fill="#55c59f" font-size="19" font-weight="700">Choose CA certificate → root.crt</text>
 
     <rect x="615" y="425" width="535" height="245" rx="22" fill="#1b2230" stroke="#e878a5" stroke-width="3"/>
     <circle cx="663" cy="475" r="25" fill="#e878a5"/>
