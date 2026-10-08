@@ -1,7 +1,7 @@
 ---
 name: "Partyline"
 guid: "9512396d-7364-4d1f-aa1a-aa719e8ee3ff"
-version: "1.0.0.0"
+version: "1.0.1.0"
 targetAbi: "10.11.0.0"
 framework: "net9.0"
 overview: "A Syncplay Chat fork adding private WebRTC voice to Jellyfin SyncPlay"
@@ -12,4 +12,4 @@ category: "General"
 owner: "Llewellyn500"
 artifacts:
 - "Jellyfin.Plugin.Partyline.dll"
-changelog: "Initial independent Partyline release."
+changelog: "Fix chat scrolling changing player volume and chat input losing focus after sending. Keep chat open while the message box is focused."

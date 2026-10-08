@@ -238,6 +238,7 @@
 
         input.addEventListener('keydown', function (event) {
             event.stopPropagation();
+            scheduleComposerCollapse();
 
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -264,8 +265,17 @@
         composer.appendChild(header);
         composer.appendChild(messages);
         composer.appendChild(footer);
-        ['pointerdown', 'keydown', 'input', 'wheel'].forEach(function (eventName) {
+        ['pointerdown', 'keydown', 'input', 'wheel', 'focusin'].forEach(function (eventName) {
             composer.addEventListener(eventName, scheduleComposerCollapse);
+        });
+        input.addEventListener('blur', function () {
+            window.setTimeout(scheduleComposerCollapse, 0);
+        });
+        // Keep player shortcuts, wheel volume, and click-to-focus outside the chat.
+        ['wheel', 'keydown', 'keypress', 'keyup', 'pointerdown', 'mousedown', 'click', 'dblclick'].forEach(function (eventName) {
+            composer.addEventListener(eventName, function (event) {
+                event.stopPropagation();
+            });
         });
         return composer;
     }
@@ -431,7 +441,8 @@
         const sendButton = document.getElementById(sendButtonId);
 
         if (input) {
-            input.disabled = isBusy;
+            // A disabled textarea loses focus and hands spacebar back to the player.
+            input.readOnly = isBusy;
         }
 
         if (sendButton) {
@@ -452,10 +463,15 @@
     function scheduleComposerCollapse() {
         window.clearTimeout(composerCollapseTimer);
         composerCollapseTimer = 0;
-        if (!isCompactMode() || !isComposerOpen()) {
+        const input = document.getElementById(inputId);
+        if (!isCompactMode() || !isComposerOpen() || document.activeElement === input) {
             return;
         }
-        composerCollapseTimer = window.setTimeout(hideComposer, fullscreenCollapseMs);
+        composerCollapseTimer = window.setTimeout(function () {
+            if (document.activeElement !== document.getElementById(inputId)) {
+                hideComposer();
+            }
+        }, fullscreenCollapseMs);
     }
 
     function toggleComposer(button) {
@@ -514,6 +530,7 @@
             return;
         }
 
+        document.getElementById(inputId).focus({ preventScroll: true });
         onChatButtonClick(text);
     }
 
@@ -1620,7 +1637,7 @@
                 if (event.target && event.target.__syncPlayVoiceAudio) {
                     return;
                 }
-                if (isCompactMode()) {
+                if (isCompactMode() && document.activeElement !== document.getElementById(inputId)) {
                     hideComposer();
                 }
                 addButton();
