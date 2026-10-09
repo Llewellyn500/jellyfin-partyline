@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/Llewellyn500/jellyfin-partyline/main/assets/icon.png",
         "versions": [
             {
+                "changelog": "Fix chat scrolling changing player volume, keep message input focused after sending, and prevent chat auto-collapse while typing. Restart Jellyfin and refresh the browser after updating. Partyline remains an independently maintained GPL fork of Syncplay Chat by Abhay V Ashokan.",
+                "targetAbi": "10.11.0.0",
+                "version": "1.0.1.0",
+                "sourceUrl": "https://github.com/Llewellyn500/jellyfin-partyline/releases/download/v1.0.1.0/Jellyfin.Plugin.Partyline_1.0.1.0.zip",
+                "checksum": "3da2c27a706905ebc6da42bbae99e2cd",
+                "timestamp": "2026-10-09T01:19:59"
+            },
+            {
                 "changelog": "Partyline is an independently maintained fork of Syncplay Chat by Abhay V Ashokan. It preserves the original SyncPlay text chat and adds opt-in peer-to-peer WebRTC voice, persistent chat history, mobile and playback-aware controls, and reconnect recovery. Caddy provides HTTPS for microphone access; optional coturn settings remain available only when direct WebRTC connections fail. See NOTICE.md for attribution and docs/caddy-https.md for private-network setup.",
                 "targetAbi": "10.11.0.0",
                 "version": "1.0.0.0",
